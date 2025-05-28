@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multilingual Typing Tools</title>
+    <style>
+        :root {
+            --bg-color: #261C15;
+            --surface-color: #3E2C21;
+            --text-color: #F5EFE6;
+            --primary-color: #FF8C00;
+            --primary-hover-color: #E67E00;
+            --secondary-color: #5A3E30;
+            --secondary-hover-color: #6B4A3A;
+            --border-color: #503C30;
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            /* Specific fonts for language names if desired, but keeping it simple for index */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 10px;
+        }
+
+        .app-header {
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .app-header h1 {
+            font-size: 2em;
+            color: var(--primary-color);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+
+        .app-header p {
+            font-size: 1.1em;
+            color: var(--text-color);
+        }
+
+        .container {
+            background-color: var(--surface-color);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .language-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            list-style: none;
+            padding: 0;
+        }
+
+        .language-card {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .language-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .language-card a {
+            display: block;
+            padding: 20px 15px;
+            text-decoration: none;
+            color: var(--primary-color);
+            font-size: 1.2em;
+            font-weight: 600;
+            text-align: center;
+            transition: color 0.2s;
+        }
+        .language-card a .native-name {
+            display: block;
+            font-size: 0.8em;
+            color: var(--text-color);
+            margin-top: 5px;
+            font-weight: normal;
+        }
+
+
+        .language-card a:hover {
+            color: var(--primary-hover-color);
+        }
+        .language-card a:hover .native-name{
+             color: var(--primary-color);
+        }
+
+
+        @media (max-width: 600px) {
+            .app-header h1 {
+                font-size: 1.6em;
+            }
+            .app-header p {
+                font-size: 1em;
+            }
+            .language-grid {
+                grid-template-columns: 1fr; /* Single column on smaller screens */
+            }
+            .language-card a {
+                font-size: 1.1em;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <h1>Multilingual Typing Tools</h1>
+        <p>Select a language to access its dedicated typing tool.</p>
+    </header>
+
+    <div class="container">
+        <ul class="language-grid">
+            <li class="language-card">
+                <a href="marathi-k.html">
+                    Marathi <span class="native-name">(मराठी)</span>
+                </a>
+            </li>
+            <li class="language-card">
+                <a href="hindi-k.html">
+                    Hindi <span class="native-name">(हिन्दी)</span>
+                </a>
+            </li>
+            <li class="language-card">
+                <a href="tamil-k.html">
+                    Tamil <span class="native-name">(தமிழ்)</span>
+                </a>
+            </li>
+            <li class="language-card">
+                <a href="bengali-k.html">
+                    Bengali <span class="native-name">(বাংলা)</span>
+                </a>
+            </li>
+            <li class="language-card">
+                <a href="assamese-k.html">
+                    Assamese <span class="native-name">(অসমীয়া)</span>
+                </a>
+            </li>
+            <li class="language-card">
+                <a href="odiya-k.html">
+                    Odia <span class="native-name">(ଓଡ଼ିଆ)</span>
+                </a>
+            </li>
+            <li class="language-card">
+                <a href="urdu-k.html">
+                    Urdu <span class="native-name">(اردو)</span>
+                </a>
+            </li>
+            <li class="language-card">
+                <a href="arabic-k.html">
+                    Arabic <span class="native-name">(العربية)</span>
+                </a>
+            </li>
+            <li class="language-card">
+                <a href="mandarin-simplified-k.html">
+                    Mandarin (Simplified) <span class="native-name">(简体中文)</span>
+                </a>
+            </li>
+            <li class="language-card">
+                <a href="russian-k.html">
+                    Russian <span class="native-name">(Русский)</span>
+                </a>
+            </li>
+            <li class="language-card">
+                <a href="telugu-k.html">
+                    Telugu <span class="native-name">(తెలుగు)</span>
+                </a>
+            </li>
+            <li class="language-card">
+                <a href="kannada-k.html">
+                    Kannada <span class="native-name">(ಕನ್ನಡ)</span>
+                </a>
+            </li>
+            <li class="language-card">
+                <a href="malayalam-k.html">
+                    Malayalam <span class="native-name">(മലയാളം)</span>
+                </a>
+            </li>
+            <!-- Add more languages here as needed -->
+        </ul>
+    </div>
+</body>
+</html>

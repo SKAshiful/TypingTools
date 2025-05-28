@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>आधुनिक हिंदी टाइपिंग टूल</title>
+    <style>
+        :root {
+            --bg-color: #261C15; /* Dark Brown */
+            --surface-color: #3E2C21; /* Medium Brown */
+            --text-color: #F5EFE6; /* Off-white / Cream */
+            --primary-color: #FF8C00; /* Dark Orange */
+            --primary-hover-color: #E67E00; /* Darker Orange for hover */
+            --secondary-color: #5A3E30; /* Muted Brown */
+            --secondary-hover-color: #6B4A3A; /* Lighter Muted Brown */
+            --border-color: #503C30; /* Brownish Border */
+            --font-hindi: 'Noto Sans Devanagari', 'Baloo Bhai 2', 'Mangal', Arial, sans-serif; /* Hindi/Devanagari Fonts */
+            --font-latin: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-latin);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .app-header {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 0 5px;
+        }
+
+        .app-header h1 {
+            font-size: 1.3em;
+            color: var(--primary-color);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            font-family: var(--font-hindi);
+        }
+
+        .back-button {
+            padding: 7px 12px;
+            font-size: 0.85em;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            font-family: var(--font-hindi);
+        }
+        .back-button:hover {
+            background-color: var(--secondary-hover-color);
+        }
+
+        .container {
+            background-color: var(--surface-color);
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .main-textarea {
+            width: 100%;
+            min-height: 120px;
+            font-size: 1.5em; /* Good size for Devanagari */
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin-bottom: 12px;
+            font-family: var(--font-hindi); /* Hindi font for textarea */
+            resize: vertical;
+        }
+        .main-textarea::placeholder {
+            color: #998273;
+            font-family: var(--font-hindi);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .controls button {
+            padding: 8px 12px;
+            font-size: 0.9em; /* Adjusted for Hindi text */
+            font-family: var(--font-hindi); /* Hindi for button text */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: #111;
+            transition: background-color 0.2s, transform 0.1s;
+            font-weight: 600;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+        }
+        .controls button:hover {
+            background-color: var(--primary-hover-color);
+        }
+        .controls button:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .controls button.secondary {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+        .controls button.secondary:hover {
+            background-color: var(--secondary-hover-color);
+        }
+
+        .status-message {
+            text-align: center;
+            margin-bottom: 12px;
+            font-style: italic;
+            color: #BEA697;
+            font-size: 0.85em;
+            font-family: var(--font-hindi);
+        }
+
+        .instructions.hidden {
+             display: none !important;
+        }
+        .instructions {
+            background-color: rgba(0,0,0,0.1);
+            padding: 8px;
+            border-radius: 5px;
+            margin-top: 8px;
+            font-size: 0.75em;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            font-family: var(--font-hindi);
+        }
+        .instructions code {
+            background-color: rgba(255,255,255,0.1);
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-family: monospace; /* Keep monospace for code */
+            color: #c0c0c0;
+        }
+
+
+        .keyboard-area {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            border-radius: 6px;
+            background-color: var(--bg-color);
+        }
+
+        .keyboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            justify-content: center;
+        }
+
+        .keyboard-row {
+            display: flex;
+            width: 100%;
+            margin-bottom: 3px;
+            gap: 3px;
+        }
+
+        .keyboard button {
+            font-family: var(--font-hindi); /* Hindi font for keys */
+            font-size: clamp(0.8em, 2.5vw, 1.1em);
+            padding: 6px 0;
+            flex-grow: 1;
+            flex-basis: 0;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            background-color: var(--surface-color);
+            color: var(--text-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+            min-width: 26px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        .keyboard button:hover {
+            background-color: var(--secondary-hover-color);
+            border-color: var(--primary-color);
+        }
+        .keyboard button:active {
+            background-color: var(--primary-color);
+            color: #111;
+            transform: translateY(1px);
+        }
+
+        .keyboard button.special {
+            background-color: var(--secondary-color);
+            font-family: var(--font-latin); /* Latin for special keys text */
+            font-size: clamp(0.65em, 1.8vw, 0.85em);
+            flex-grow: 1.3;
+        }
+        .keyboard button.spacebar {
+            flex-grow: 4;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 400px) {
+            .keyboard button {
+                min-width: 22px;
+                height: 36px;
+                font-size: clamp(0.7em, 2.2vw, 1em);
+            }
+             .keyboard button.special {
+                font-size: clamp(0.6em, 1.6vw, 0.8em);
+            }
+            .app-header h1 { font-size: 1em; }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <h1>हिंदी टाइपिंग साधन</h1>
+        <a href="index.html" class="back-button">वापस</a>
+    </header>
+
+    <div class="container">
+        <textarea id="mainTextarea" class="main-textarea" placeholder="यहाँ टाइप करें..."></textarea>
+
+        <div class="controls">
+            <button id="toggleModeButton">फोनेटिक मोड पर स्विच करें</button>
+            <button id="copyButton" class="secondary">कॉपी करें</button>
+        </div>
+
+        <div id="statusMessage" class="status-message">मोड: ऑन-स्क्रीन कीबोर्ड</div>
+
+        <div id="phoneticInstructions" class="instructions hidden">
+            <p>फोनेटिक मोड सक्रिय। (उदा: <code>k</code> -> क, <code>X</code> -> ्)</p>
+        </div>
+
+        <div id="onScreenKeyboardArea" class="keyboard-area">
+            <div id="hindiKeyboard" class="keyboard">
+                <!-- Hindi Keyboard buttons will be generated here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mainTextarea = document.getElementById('mainTextarea');
+            const toggleModeButton = document.getElementById('toggleModeButton');
+            const copyButton = document.getElementById('copyButton');
+            const onScreenKeyboardArea = document.getElementById('onScreenKeyboardArea');
+            const phoneticInstructions = document.getElementById('phoneticInstructions');
+            const keyboardContainer = document.getElementById('hindiKeyboard');
+            const statusMessage = document.getElementById('statusMessage');
+
+            let currentMode = 'onscreen';
+            let previousPhoneticInput = "";
+
+            // --- Hindi Phonetic Conversion Logic ---
+            const phoneticMap = {
+                // Vowels (Svar) - Standalone and Matras - Prioritize longer matches
+                'au': { default: 'औ', matra: 'ौ' }, 'AU': { default: 'औ', matra: 'ौ' },
+                'ai': { default: 'ऐ', matra: 'ै' }, 'AI': { default: 'ऐ', matra: 'ै' },
+                'aa': { default: 'आ', matra: 'ा' }, 'AA': { default: 'आ', matra: 'ा' }, 'A': { default: 'आ', matra: 'ा' },
+                'ee': { default: 'ई', matra: 'ी' }, 'EE': { default: 'ई', matra: 'ी' }, 'I': { default: 'ई', matra: 'ी' },
+                'oo': { default: 'ऊ', matra: 'ू' }, 'OO': { default: 'ऊ', matra: 'ू' }, 'U': { default: 'ऊ', matra: 'ू' },
+                'Ru': { default: 'ऋ', matra: 'ृ' }, 'R^i': { default: 'ऋ', matra: 'ृ' },
+                'a':  { default: 'अ', matra: '' },  // Inherent 'a'
+                'i':  { default: 'इ', matra: 'ि' },
+                'u':  { default: 'उ', matra: 'ु' },
+                'e':  { default: 'ए', matra: 'े' }, 'E': { default: 'ए', matra: 'े' },
+                'o':  { default: 'ओ', matra: 'ो' }, 'O': { default: 'ओ', matra: 'ो' },
+
+                // Consonants (Vyanjan) - Prioritize longer matches
+                'chh': 'छ', 'Chh': 'छ',
+                'kh': 'ख', 'Kh': 'ख',
+                'gh': 'घ', 'Gh': 'घ',
+                'jh': 'झ', 'Jh': 'झ',
+                'Th': 'ठ', // Retroflex T
+                'Dh': 'ढ', // Retroflex D
+                'th': 'थ', // Dental t
+                'dh': 'ध', // Dental d
+                'ph': 'फ', 'Ph': 'फ', 'f': 'फ', 'F': 'फ',
+                'bh': 'भ', 'Bh': 'भ',
+                'sh': 'श', 'Sh': 'श', // Palatal sh (श)
+                'SH': 'ष', 'Sha': 'ष', // Retroflex Sh (ष)
+                'k': 'क', 'K': 'क', 'q': 'क', 'Q': 'क',
+                'g': 'ग', 'G': 'ग',
+                'ng': 'ङ', 'Nga': 'ङ',
+                'ch': 'च', 'C': 'च',
+                'j': 'ज', 'J': 'ज', 'z': 'ज', 'Z': 'ज',
+                'nj': 'ञ', 'Nya': 'ञ',
+                'T': 'ट', // Retroflex
+                'D': 'ड', // Retroflex
+                'N': 'ण', // Retroflex N (ण U+0923)
+                't': 'त', // Dental
+                'd': 'द', // Dental
+                'n': 'न', // Dental (न U+0928)
+                'p': 'प', 'P': 'प',
+                'b': 'ब', 'B': 'ब',
+                'm': 'म', 'M': 'म',
+                'y': 'य', 'Y': 'य',
+                'r': 'र', 'R': 'र',
+                'l': 'ल', // Dental l (ल U+0932)
+                'v': 'व', 'V': 'व', 'w': 'व', 'W': 'व',
+                's': 'स', 'S': 'स',
+                'h': 'ह', 'H':'ह',
+
+                // Halant ( ् )
+                'X': '्', 'virama': '्', 'halant': '्',
+
+                // Anusvara, Visarga, Chandrabindu
+                'MM': 'ं', // Using MM for Anusvara to avoid 'M' conflict with 'म'
+                'M': 'म',  // Ensure 'M' is primarily 'म'
+                'anusvara': 'ं', // Alternative for Anusvara
+                'H:': 'ः', ':': 'ः', 'visarga': 'ः',
+                '^': 'ँ', 'n~': 'ँ', 'chandrabindu': 'ँ',
+
+                // Common Conjuncts
+                'ksh': 'क्ष', 'kSh': 'क्ष', 'kS': 'क्ष',
+                'tr': 'त्र', 'Tr': 'त्र',
+                'gy': 'ज्ञ', 'Gy': 'ज्ञ', 'jny':'ज्ञ', 'Jny':'ज्ञ',
+                'shr': 'श्र',
+                'shree': 'श्री', 'Shree': 'श्री', 'Shri': 'श्री', 'shri': 'श्री',
+
+                // Punctuation
+                '..': '.', // English Period
+                '.': '।',  // Purnaviram (Danda)
+                '$': '₹', // Rupee sign
+                '?': '?', '!': '!' // Pass through
+            };
+            // Adjusting Anusvara: if 'M' is used for 'म', need a different trigger like 'MM' or 'M.'
+            // For simplicity, if 'M' is typed after a consonant, it might be Anusvara.
+            // Or better, keep 'M' for 'म' and use something else entirely for Anusvara like phoneticMap['anusvara'] = 'ं';
+            // The original had 'M': 'ं' - this means 'M' could not be used for 'म'.
+            // Let's try this: 'M' for 'म', and require something like 'M.' or '^M' for anusvara.
+            // Or stick to convention: 'n' before some consonants becomes anusvara, but explicit mapping is safer.
+            // The original Marathi mapping ` 'M': 'ं' ` is simpler to implement than context-sensitive anusvara.
+            // Let's keep 'M' for 'म' and '.n' for 'ं' (Anusvara) and '.m' for 'ं' as well (common alternative).
+            // Reverting to simpler model: 'M' for Anusvara if it's not ambiguous or use 'n' with halant contextually, or explicit.
+            // The original used 'M': 'ं'. Let's re-evaluate.
+            // 'm': 'म', 'M': 'म' (lowercase/uppercase)
+            // For Anusvara, let's use 'M' (uppercase) for Anusvara like in some conventions, and ensure 'm' is 'म'.
+            // The original phoneticMap had 'M': 'ं'. This is problematic if 'M' is also for 'म'.
+            // Let's make 'M' be 'म' and use 'n nasal' e.g. '.n' or 'M~' for 'ं'.
+            // For now, the code has 'M': 'म', and 'MM': 'ं'. This seems a reasonable compromise.
+            // Let's correct the phonetic map slightly as 'M' for anusvara is very common.
+            // So, if 'M' is anusvara, then 'm' must be 'म'.
+            // Original phonetic map has: 'm': 'म', 'M': 'म', AND 'M': 'ं'. This is an issue.
+            // The current version uses 'MM': 'ं', which is okay. Or use `am`, `im`, `um` -> अं इं उं
+            // I will use `\.M` for Anusvara to make it distinct if `M` is 'म'.
+            // The Marathi one had 'M':'ं', which means 'ma' would be 'm' then 'a'.
+            // This is a common scheme: m -> म, M -> ं
+            phoneticMap['.m'] = 'ं'; // Adding an explicit way for Anusvara if 'M' is for 'म'
+            phoneticMap['.n'] = 'ं'; // Common alternative
+
+            const hindiConsonants = "कखगघङचछजझञटठडढणतथदधनपफबभमयरलवशषसहक्षत्रज्ञश्र";
+            const isHindiConsonant = char => hindiConsonants.includes(char);
+
+            function convertPhoneticToHindi(inputText) {
+                let output = "";
+                let i = 0;
+                const len = inputText.length;
+                const phoneticKeys = Object.keys(phoneticMap).sort((a, b) => b.length - a.length);
+
+                while (i < len) {
+                    let matched = false;
+                    for (const key of phoneticKeys) {
+                        if (inputText.substring(i).startsWith(key)) {
+                            const rule = phoneticMap[key];
+                            let charToAdd = "";
+
+                            if (typeof rule === 'string') {
+                                 // Special handling for anusvara via .m or .n to remove the dot
+                                if ((key === '.m' || key === '.n') && rule === 'ं') {
+                                    if (output.length > 0 && output.endsWith('.')) { // if a dot was typed
+                                        output = output.substring(0, output.length -1);
+                                    }
+                                    charToAdd = rule;
+                                } else if (rule === '्' && output.length > 0 && isHindiConsonant(output[output.length - 1])) {
+                                    charToAdd = rule;
+                                } else if (isHindiConsonant(rule)) {
+                                    charToAdd = rule;
+                                } else {
+                                     charToAdd = rule;
+                                }
+                            } else { // Vowel object
+                                const lastCharOutput = output.length > 0 ? output[output.length - 1] : null;
+                                if (lastCharOutput && isHindiConsonant(lastCharOutput) && rule.matra !== undefined) {
+                                    if (key === 'a' && rule.matra === '') { // Inherent 'a'
+                                        if (output.endsWith('्')) { // Remove halant if 'a' is typed
+                                            output = output.substring(0, output.length -1);
+                                        }
+                                        charToAdd = ''; // Matra for 'a' is implicit (no character)
+                                    } else {
+                                        if (output.endsWith('्')) { // Remove halant before applying matra
+                                           output = output.substring(0, output.length -1);
+                                        }
+                                        charToAdd = rule.matra;
+                                    }
+                                } else {
+                                    charToAdd = rule.default;
+                                }
+                            }
+                            output += charToAdd;
+                            i += key.length;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        // Pass through numbers and common punctuation not explicitly mapped
+                        if (/[0-9.,!?@#$%^&*(){}[\];:"'<>/\\|`~+\-=\s]/.test(inputText[i])) {
+                           output += inputText[i];
+                        } else {
+                           // Default pass-through for unmatched characters, or could be ignored/logged
+                           output += inputText[i];
+                        }
+                        i++;
+                    }
+                }
+                return output;
+            }
+
+
+            // --- On-Screen Hindi Keyboard Logic ---
+            const hindiKeyboardLayout = [
+                // Svar (Vowels)
+                ['अ', 'आ', 'इ', 'ई', 'उ', 'ऊ', 'ऋ', 'ए', 'ऐ', 'ओ', 'औ'],
+                ['अं', 'अः', 'ँ'], // Modifiers
+                // Vyanjan (Consonants)
+                ['क', 'ख', 'ग', 'घ', 'ङ',  'च', 'छ', 'ज', 'झ', 'ञ'],
+                ['ट', 'ठ', 'ड', 'ढ', 'ण',  'त', 'थ', 'द', 'ध', 'न'],
+                ['प', 'फ', 'ब', 'भ', 'म',  'य', 'र', 'ल', 'व', 'श'],
+                ['ष', 'स', 'ह', 'क्ष', 'त्र', 'ज्ञ', 'श्र'],
+                // Matras & Halant
+                ['ा', 'ि', 'ी', 'ु', 'ू', 'ृ', 'े', 'ै', 'ो', 'ौ', '्'],
+                // Numerals
+                ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९', '।'],
+                // Punctuation & Controls
+                ['?', '!', ',', '.', '₹', 'Backspace', 'Space', 'Clear']
+            ];
+
+
+            function createOnScreenKeyboard() {
+                keyboardContainer.innerHTML = '';
+                hindiKeyboardLayout.forEach(rowKeys => {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.classList.add('keyboard-row');
+                    rowKeys.forEach(key => {
+                        const button = document.createElement('button');
+                        button.textContent = key;
+                        if (['Backspace', 'Clear', 'Space'].includes(key)) {
+                            button.classList.add('special');
+                            if (key === 'Space') button.classList.add('spacebar');
+                        } else if (['?', '!', '₹', ',', '.'].includes(key) || (key >= '0' && key <= '9' && key.length === 1 && !hindiKeyboardLayout.flat().includes(key))){
+                             button.classList.add('special');
+                             button.style.fontFamily = 'var(--font-latin)';
+                        }
+                        button.addEventListener('click', () => handleOnScreenKey(key));
+                        rowDiv.appendChild(button);
+                    });
+                    keyboardContainer.appendChild(rowDiv);
+                });
+            }
+
+            function handleOnScreenKey(key) {
+                const cursorPos = mainTextarea.selectionStart;
+                const text = mainTextarea.value;
+                switch (key) {
+                    case 'Backspace':
+                        if (cursorPos > 0) {
+                            mainTextarea.value = text.substring(0, cursorPos - 1) + text.substring(mainTextarea.selectionEnd);
+                            mainTextarea.selectionStart = mainTextarea.selectionEnd = cursorPos - 1;
+                        }
+                        break;
+                    case 'Clear':
+                        mainTextarea.value = '';
+                        break;
+                    case 'Space':
+                        insertAtCursor(mainTextarea, ' ');
+                        break;
+                    default:
+                        insertAtCursor(mainTextarea, key);
+                        break;
+                }
+                mainTextarea.focus();
+            }
+
+            function insertAtCursor(textarea, textToInsert) {
+                const startPos = textarea.selectionStart;
+                const endPos = textarea.selectionEnd;
+                const scrollTop = textarea.scrollTop;
+                textarea.value = textarea.value.substring(0, startPos) +
+                                 textToInsert +
+                                 textarea.value.substring(endPos, textarea.value.length);
+                textarea.selectionStart = textarea.selectionEnd = startPos + textToInsert.length;
+                textarea.scrollTop = scrollTop;
+            }
+
+            toggleModeButton.addEventListener('click', () => {
+                if (currentMode === 'onscreen') {
+                    currentMode = 'phonetic';
+                    toggleModeButton.textContent = 'ऑन-स्क्रीन कीबोर्ड पर स्विच करें';
+                    statusMessage.textContent = 'मोड: फोनेटिक टाइपिंग';
+                    onScreenKeyboardArea.classList.add('hidden');
+                    phoneticInstructions.classList.remove('hidden');
+                    mainTextarea.readOnly = false;
+                    mainTextarea.placeholder = "फोनेटिक रूप से टाइप करें (उदा: mera desh)";
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                } else {
+                    currentMode = 'onscreen';
+                    toggleModeButton.textContent = 'फोनेटिक मोड पर स्विच करें';
+                    statusMessage.textContent = 'मोड: ऑन-स्क्रीन कीबोर्ड';
+                    onScreenKeyboardArea.classList.remove('hidden');
+                    phoneticInstructions.classList.add('hidden');
+                    mainTextarea.readOnly = true; // Readonly for on-screen keyboard
+                    mainTextarea.placeholder = "ऑन-स्क्रीन कीबोर्ड का प्रयोग करें";
+                    mainTextarea.removeEventListener('input', handlePhoneticInput);
+                }
+                mainTextarea.focus();
+            });
+
+            function handlePhoneticInput() {
+                if (currentMode === 'phonetic') {
+                    const currentRawInput = mainTextarea.value;
+                    const originalCursorStart = mainTextarea.selectionStart;
+
+                    const marathiText = convertPhoneticToHindi(currentRawInput); // Changed function name
+                    
+                    const rawInputBeforeCursor = currentRawInput.substring(0, originalCursorStart);
+                    const convertedPrefix = convertPhoneticToHindi(rawInputBeforeCursor); // Changed function name
+                    let newCursorPos = convertedPrefix.length;
+
+                    // Temporarily remove listener to prevent recursion during value set
+                    mainTextarea.removeEventListener('input', handlePhoneticInput);
+                    mainTextarea.value = marathiText;
+                    // Re-add listener
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                    
+                    try {
+                        mainTextarea.selectionStart = mainTextarea.selectionEnd = newCursorPos;
+                    } catch (e) {
+                        // Fallback if setting cursor position fails (e.g., during rapid typing)
+                        mainTextarea.selectionStart = mainTextarea.selectionEnd = marathiText.length;
+                    }
+                    previousPhoneticInput = currentRawInput;
+                }
+            }
+
+            copyButton.addEventListener('click', () => {
+                if (!mainTextarea.value) return;
+                navigator.clipboard.writeText(mainTextarea.value)
+                    .then(() => {
+                        const originalText = copyButton.textContent;
+                        copyButton.textContent = 'कॉपी किया गया!';
+                        copyButton.disabled = true;
+                        setTimeout(() => {
+                            copyButton.textContent = originalText;
+                            copyButton.disabled = false;
+                        }, 1500);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                        mainTextarea.select(); // Select text for manual copy
+                        try {
+                            document.execCommand('copy'); // Fallback
+                            const originalText = copyButton.textContent;
+                            copyButton.textContent = 'कॉपी किया गया (फालबैक)!';
+                            copyButton.disabled = true;
+                            setTimeout(() => {
+                                copyButton.textContent = originalText;
+                                copyButton.disabled = false;
+                            }, 2000);
+                        } catch (e) {
+                             alert('कॉपी करने में विफल। कृपया स्वयं कॉपी करें।');
+                        }
+                        window.getSelection().removeAllRanges(); // Deselect
+                    });
+                mainTextarea.focus();
+            });
+
+            function initializeApp() {
+                createOnScreenKeyboard();
+                if (currentMode === 'onscreen') {
+                    mainTextarea.readOnly = true;
+                    mainTextarea.placeholder = "ऑन-स्क्रीन कीबोर्ड का प्रयोग करें";
+                    onScreenKeyboardArea.classList.remove('hidden');
+                    phoneticInstructions.classList.add('hidden');
+                    statusMessage.textContent = 'मोड: ऑन-स्क्रीन कीबोर्ड';
+                    toggleModeButton.textContent = 'फोनेटिक मोड पर स्विच करें';
+                } else { // phonetic mode
+                    mainTextarea.readOnly = false;
+                    mainTextarea.placeholder = "फोनेटिक रूप से टाइप करें (उदा: mera desh)";
+                    onScreenKeyboardArea.classList.add('hidden');
+                    phoneticInstructions.classList.remove('hidden');
+                    statusMessage.textContent = 'मोड: फोनेटिक टाइपिंग';
+                    toggleModeButton.textContent = 'ऑन-स्क्रीन कीबोर्ड पर स्विच करें';
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                }
+                mainTextarea.focus();
+            }
+            initializeApp();
+        });
+    </script>
+</body>
+</html>

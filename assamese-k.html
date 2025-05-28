@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="as">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>আধুনিক অসমীয়া টাইপিং সঁজুলি</title>
+    <style>
+        :root {
+            --bg-color: #261C15; /* Dark Brown */
+            --surface-color: #3E2C21; /* Medium Brown */
+            --text-color: #F5EFE6; /* Off-white / Cream */
+            --primary-color: #FF8C00; /* Dark Orange */
+            --primary-hover-color: #E67E00; /* Darker Orange for hover */
+            --secondary-color: #5A3E30; /* Muted Brown */
+            --secondary-hover-color: #6B4A3A; /* Lighter Muted Brown */
+            --border-color: #503C30; /* Brownish Border */
+            --font-assamese: 'Noto Sans Assamese', 'Baloo Bhaijaan 2', 'Hind Siliguri', Arial, sans-serif; /* Assamese Fonts */
+            --font-latin: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-latin);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .app-header {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 0 5px;
+        }
+
+        .app-header h1 {
+            font-size: 1.3em;
+            color: var(--primary-color);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            font-family: var(--font-assamese);
+        }
+
+        .back-button {
+            padding: 7px 12px;
+            font-size: 0.85em;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            font-family: var(--font-assamese);
+        }
+        .back-button:hover {
+            background-color: var(--secondary-hover-color);
+        }
+
+        .container {
+            background-color: var(--surface-color);
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .main-textarea {
+            width: 100%;
+            min-height: 120px;
+            font-size: 1.5em; /* Good size for Assamese */
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin-bottom: 12px;
+            font-family: var(--font-assamese); /* Assamese font for textarea */
+            resize: vertical;
+        }
+        .main-textarea::placeholder {
+            color: #998273;
+            font-family: var(--font-assamese);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .controls button {
+            padding: 8px 12px;
+            font-size: 0.9em; /* Adjusted for Assamese text */
+            font-family: var(--font-assamese); /* Assamese for button text */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: #111;
+            transition: background-color 0.2s, transform 0.1s;
+            font-weight: 600;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+        }
+        .controls button:hover {
+            background-color: var(--primary-hover-color);
+        }
+        .controls button:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .controls button.secondary {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+        .controls button.secondary:hover {
+            background-color: var(--secondary-hover-color);
+        }
+
+        .status-message {
+            text-align: center;
+            margin-bottom: 12px;
+            font-style: italic;
+            color: #BEA697;
+            font-size: 0.85em;
+            font-family: var(--font-assamese);
+        }
+
+        .instructions.hidden {
+             display: none !important;
+        }
+        .instructions {
+            background-color: rgba(0,0,0,0.1);
+            padding: 8px;
+            border-radius: 5px;
+            margin-top: 8px;
+            font-size: 0.75em;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            font-family: var(--font-assamese);
+        }
+        .instructions code {
+            background-color: rgba(255,255,255,0.1);
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-family: monospace; /* Keep monospace for code */
+            color: #c0c0c0;
+        }
+
+
+        .keyboard-area {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            border-radius: 6px;
+            background-color: var(--bg-color);
+        }
+
+        .keyboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            justify-content: center;
+        }
+
+        .keyboard-row {
+            display: flex;
+            width: 100%;
+            margin-bottom: 3px;
+            gap: 3px;
+        }
+
+        .keyboard button {
+            font-family: var(--font-assamese); /* Assamese font for keys */
+            font-size: clamp(0.8em, 2.5vw, 1.1em);
+            padding: 6px 0;
+            flex-grow: 1;
+            flex-basis: 0;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            background-color: var(--surface-color);
+            color: var(--text-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+            min-width: 26px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        .keyboard button:hover {
+            background-color: var(--secondary-hover-color);
+            border-color: var(--primary-color);
+        }
+        .keyboard button:active {
+            background-color: var(--primary-color);
+            color: #111;
+            transform: translateY(1px);
+        }
+
+        .keyboard button.special {
+            background-color: var(--secondary-color);
+            font-family: var(--font-latin); /* Latin for special keys text */
+            font-size: clamp(0.65em, 1.8vw, 0.85em);
+            flex-grow: 1.3;
+        }
+        .keyboard button.spacebar {
+            flex-grow: 4;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 400px) {
+            .keyboard button {
+                min-width: 22px;
+                height: 36px;
+                font-size: clamp(0.7em, 2.2vw, 1em);
+            }
+             .keyboard button.special {
+                font-size: clamp(0.6em, 1.6vw, 0.8em);
+            }
+            .app-header h1 { font-size: 1em; }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <h1>অসমীয়া টাইপিং সঁজুলি</h1>
+        <a href="index.html" class="back-button">পিছলৈ যাওক</a>
+    </header>
+
+    <div class="container">
+        <textarea id="mainTextarea" class="main-textarea" placeholder="ইয়াত টাইপ কৰক..."></textarea>
+
+        <div class="controls">
+            <button id="toggleModeButton">ফোনেটিক মোডলৈ যাওক</button>
+            <button id="copyButton" class="secondary">কপি কৰক</button>
+        </div>
+
+        <div id="statusMessage" class="status-message">মোড: অন-স্ক্ৰীন কীৰ্বড</div>
+
+        <div id="phoneticInstructions" class="instructions hidden">
+            <p>ফোনেটিক মোড সক্ৰিয়। (যেনেঃ <code>k</code> -> ক, <code>X</code> -> ্)</p>
+        </div>
+
+        <div id="onScreenKeyboardArea" class="keyboard-area">
+            <div id="assameseKeyboard" class="keyboard">
+                <!-- Assamese Keyboard buttons will be generated here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mainTextarea = document.getElementById('mainTextarea');
+            const toggleModeButton = document.getElementById('toggleModeButton');
+            const copyButton = document.getElementById('copyButton');
+            const onScreenKeyboardArea = document.getElementById('onScreenKeyboardArea');
+            const phoneticInstructions = document.getElementById('phoneticInstructions');
+            const keyboardContainer = document.getElementById('assameseKeyboard'); // Changed ID
+            const statusMessage = document.getElementById('statusMessage');
+
+            let currentMode = 'onscreen';
+            let previousPhoneticInput = "";
+
+            // --- Assamese Phonetic Conversion Logic ---
+            const phoneticMap = {
+                // Vowels (Swôrôbôrnô) - Standalone and Matras (Kar)
+                'aa': { default: 'আ', matra: 'া' }, 'A': { default: 'আ', matra: 'া' },
+                'ee': { default: 'ঈ', matra: 'ী' }, 'II': { default: 'ঈ', matra: 'ী' }, 'I': { default: 'ঈ', matra: 'ী' },
+                'oo': { default: 'ঊ', matra: 'ূ' }, 'UU': { default: 'ঊ', matra: 'ূ' }, 'U': { default: 'ঊ', matra: 'ূ' },
+                'RI': { default: 'ঋ', matra: 'ৃ' }, 'RRI': { default: 'ঋ', matra: 'ৃ' }, 'rri': { default: 'ঋ', matra: 'ৃ' },
+                'OI': { default: 'ঐ', matra: 'ৈ' }, 'ai': { default: 'ঐ', matra: 'ৈ' },
+                'OU': { default: 'ঔ', matra: 'ৌ' }, 'au': { default: 'ঔ', matra: 'ৌ' },
+                'a':  { default: 'অ', matra: '' },
+                'i':  { default: 'ই', matra: 'ি' },
+                'u':  { default: 'উ', matra: 'ু' },
+                'e':  { default: 'এ', matra: 'ে' }, 'E': { default: 'এ', matra: 'ে' },
+                'o':  { default: 'ও', matra: 'ো' }, 'O': { default: 'ও', matra: 'ো' },
+
+                // Consonants (Byônzônbôrnô)
+                'kh': 'খ', 'Kh': 'খ',
+                'gh': 'ঘ', 'Gh': 'ঘ',
+                'Ng': 'ঙ', 'NG': 'ঙ',
+                'ch': 'চ', 'Ch': 'চ',
+                'chh': 'ছ', 'Chh': 'ছ',
+                'jh': 'ঝ', 'Jh': 'ঝ',
+                'NGY': 'ঞ', 'NGc': 'ঞ', 'YNY': 'ঞ', 'JNY': 'ঞ', 'Ny': 'ঞ',
+                'Th': 'ঠ',
+                'Dh': 'ঢ',
+                'N': 'ণ', // Murddhonyô-Nô
+                'th': 'থ',
+                'dh': 'ধ',
+                'ph': 'ফ', 'Ph': 'ফ', 'f': 'ফ', 'F': 'ফ',
+                'bh': 'ভ', 'Bh': 'ভ',
+                'k': 'ক', 'K': 'ক', 'q': 'ক', 'Q': 'ক',
+                'g': 'গ', 'G': 'গ',
+                'j': 'জ', 'J': 'জ',
+                'Z': 'জ', // Allow Z for জ as well
+                'T': 'ট',
+                'D': 'ড',
+                't': 'ত',
+                'd': 'দ',
+                'n': 'ন', // Dôntyô-Nô
+                'p': 'প', 'P': 'প',
+                'b': 'ব', 'B': 'ব',
+                'm': 'ম', 'M': 'ম',
+                'Y': 'য', // Ôntôsthô-Jô (pronounced closer to Z in Assamese)
+                'r': 'ৰ', 'R': 'ৰ', // Assamese Rô
+                'l': 'ল', 'L': 'ল',
+                'w': 'ৱ', 'W': 'ৱ', 'v': 'ৱ', 'V': 'ৱ', // Assamese Wô/Vô
+                'sh': 'শ', // Talôibyô-Xô (pronounced like 'X')
+                'Sh': 'ষ', 'SH': 'ষ', // Murddhonyô-Xô (pronounced like 'X')
+                's': 'স', 'S': 'স', // Dôntyô-Xô (pronounced like 'H' or 'S')
+                'h': 'হ', 'H': 'হ',
+                'Rh': 'ড়', 'rh': 'ড়',
+                'DHh': 'ঢ়', 'dhh': 'ঢ়', 'Dhh': 'ঢ়',
+                'yY': 'য়', 'YY': 'য়', // Ôntôsthô-Yô
+
+                // Hôsôntô (Halant)
+                'X': '্', 'hosonto': '্', '_': '্',
+
+                // Ônuswar, Bisôrgô, Chôndrôbindu
+                '.M': 'ং', 'anusvara': 'ং', 'ngM': 'ং',
+                '.H': 'ঃ', 'visarga': 'ঃ',
+                '.N': 'ঁ', 'chandrabindu': 'ঁ', 'chn': 'ঁ', 'nN': 'ঁ',
+
+                // Khôndô-Tô (ৎ)
+                't_': 'ৎ', 'tH': 'ৎ', 'tX': 'ৎ',
+
+                // Common Juktakhyôr (Conjuncts)
+                'ksh': 'ক্ষ', 'kSh': 'ক্ষ', 'kkh': 'ক্ষ', // khyô
+                'gy': 'জ্ঞ', 'jN': 'জ্ঞ', 'jny': 'জ্ঞ', // gyô
+                'shr': 'শ্ৰ', 'sr': 'শ্ৰ',
+                'tr': 'ত্ৰ',
+
+                // Punctuation
+                '..': '.', // English Period
+                '.': '।',  // Dari
+                '$': '₹', // Rupee sign
+                '?': '?', '!': '!', ',': ','
+            };
+
+
+            const assameseConsonants = "কখগঘঙচছজঝঞটঠডঢণতথদধনপফবভমযৰলৱশষসহড়ঢ়য়ৎ";
+            const isAssameseConsonant = char => assameseConsonants.includes(char);
+
+            function convertPhoneticToAssamese(inputText) {
+                let output = "";
+                let i = 0;
+                const len = inputText.length;
+                const phoneticKeys = Object.keys(phoneticMap).sort((a, b) => b.length - a.length);
+
+                while (i < len) {
+                    let matched = false;
+                    for (const key of phoneticKeys) {
+                        if (inputText.substring(i).startsWith(key)) {
+                            const rule = phoneticMap[key];
+                            let charToAdd = "";
+
+                            if (typeof rule === 'string') { 
+                                if (rule === '্' && output.length > 0 && isAssameseConsonant(output[output.length - 1])) {
+                                    if (output.length > 0 && output[output.length-1] !== '্') {
+                                       charToAdd = rule;
+                                    }
+                                } else if (isAssameseConsonant(rule) || ['ং', 'ঃ', 'ঁ', 'ৎ', '।', '₹'].includes(rule)) {
+                                    charToAdd = rule;
+                                } else if (['.', '?', '!', ','].includes(rule)) {
+                                    charToAdd = rule;
+                                } else if (rule !== '্') { 
+                                    charToAdd = rule;
+                                }
+                            } else { // Vowel object
+                                const lastCharOutput = output.length > 0 ? output[output.length - 1] : null;
+                                if (lastCharOutput && (isAssameseConsonant(lastCharOutput) || lastCharOutput === '্') && rule.matra !== undefined) {
+                                    if (key === 'a' && rule.matra === '') { 
+                                        if (output.endsWith('্')) { 
+                                            output = output.substring(0, output.length -1);
+                                        }
+                                        charToAdd = ''; 
+                                    } else { 
+                                        if (output.endsWith('্')) { 
+                                           output = output.substring(0, output.length -1);
+                                        }
+                                        charToAdd = rule.matra;
+                                    }
+                                } else { 
+                                    charToAdd = rule.default;
+                                }
+                            }
+                            output += charToAdd;
+                            i += key.length;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        if (/[0-9]/.test(inputText[i])) { 
+                            output += inputText[i];
+                        } else {
+                           output += inputText[i]; 
+                        }
+                        i++;
+                    }
+                }
+                return output;
+            }
+
+            // --- On-Screen Assamese Keyboard Logic ---
+            const assameseKeyboardLayout = [
+                ['অ', 'আ', 'ই', 'ঈ', 'উ', 'ঊ', 'ঋ', 'এ', 'ঐ', 'ও', 'ঔ'],
+                ['ক', 'খ', 'গ', 'ঘ', 'ঙ',  'চ', 'ছ', 'জ', 'ঝ', 'ঞ'],
+                ['ট', 'ঠ', 'ড', 'ঢ', 'ণ',  'ত', 'থ', 'দ', 'ধ', 'ন'],
+                ['প', 'ফ', 'ব', 'ভ', 'ম',  'য', 'ৰ', 'ল', 'ৱ', 'শ'],
+                ['ষ', 'স', 'হ', 'ড়', 'ঢ়', 'য়', 'ৎ', 'ং', 'ঃ', 'ঁ', '্'],
+                ['া', 'ি', 'ী', 'ু', 'ূ', 'ৃ', 'ে', 'ৈ', 'ো', 'ৌ'],
+                ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯', '।'],
+                ['?', '!', ',', '.', '₹', 'Backspace', 'Space', 'Clear']
+            ];
+
+
+            function createOnScreenKeyboard() {
+                keyboardContainer.innerHTML = '';
+                assameseKeyboardLayout.forEach(rowKeys => {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.classList.add('keyboard-row');
+                    rowKeys.forEach(key => {
+                        const button = document.createElement('button');
+                        button.textContent = key;
+                        if (['Backspace', 'Clear', 'Space'].includes(key)) {
+                            button.classList.add('special');
+                            if (key === 'Space') button.classList.add('spacebar');
+                        } else if (['?', '!', '₹', ',', '.'].includes(key) || (key >= '0' && key <= '9' && key.length === 1 && !assameseKeyboardLayout.flat().includes(key))){
+                             button.classList.add('special');
+                             button.style.fontFamily = 'var(--font-latin)';
+                        }
+                        button.addEventListener('click', () => handleOnScreenKey(key));
+                        rowDiv.appendChild(button);
+                    });
+                    keyboardContainer.appendChild(rowDiv);
+                });
+            }
+
+            function handleOnScreenKey(key) {
+                const cursorPos = mainTextarea.selectionStart;
+                const text = mainTextarea.value;
+                switch (key) {
+                    case 'Backspace':
+                        if (cursorPos > 0) {
+                            mainTextarea.value = text.substring(0, cursorPos - 1) + text.substring(mainTextarea.selectionEnd);
+                            mainTextarea.selectionStart = mainTextarea.selectionEnd = cursorPos - 1;
+                        }
+                        break;
+                    case 'Clear':
+                        mainTextarea.value = '';
+                        break;
+                    case 'Space':
+                        insertAtCursor(mainTextarea, ' ');
+                        break;
+                    default:
+                        insertAtCursor(mainTextarea, key);
+                        break;
+                }
+                mainTextarea.focus();
+            }
+
+            function insertAtCursor(textarea, textToInsert) {
+                const startPos = textarea.selectionStart;
+                const endPos = textarea.selectionEnd;
+                const scrollTop = textarea.scrollTop;
+                textarea.value = textarea.value.substring(0, startPos) +
+                                 textToInsert +
+                                 textarea.value.substring(endPos, textarea.value.length);
+                textarea.selectionStart = textarea.selectionEnd = startPos + textToInsert.length;
+                textarea.scrollTop = scrollTop;
+            }
+
+            toggleModeButton.addEventListener('click', () => {
+                if (currentMode === 'onscreen') {
+                    currentMode = 'phonetic';
+                    toggleModeButton.textContent = 'অন-স্ক্ৰীন কীৰ্বডলৈ যাওক';
+                    statusMessage.textContent = 'মোড: ফোনেটিক টাইপিং';
+                    onScreenKeyboardArea.classList.add('hidden');
+                    phoneticInstructions.classList.remove('hidden');
+                    mainTextarea.readOnly = false;
+                    mainTextarea.placeholder = "ফোনেটিকভাৱে টাইপ কৰক (যেনেঃ মৰম)";
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                } else {
+                    currentMode = 'onscreen';
+                    toggleModeButton.textContent = 'ফোনেটিক মোডলৈ যাওক';
+                    statusMessage.textContent = 'মোড: অন-স্ক্ৰীন কীৰ্বড';
+                    onScreenKeyboardArea.classList.remove('hidden');
+                    phoneticInstructions.classList.add('hidden');
+                    mainTextarea.readOnly = true; 
+                    mainTextarea.placeholder = "অন-স্ক্ৰীন কীৰ্বড ব্যৱহাৰ কৰক";
+                    mainTextarea.removeEventListener('input', handlePhoneticInput);
+                }
+                mainTextarea.focus();
+            });
+
+            function handlePhoneticInput() {
+                if (currentMode === 'phonetic') {
+                    const currentRawInput = mainTextarea.value;
+                    const originalCursorStart = mainTextarea.selectionStart;
+
+                    const assameseText = convertPhoneticToAssamese(currentRawInput); 
+                    
+                    const rawInputBeforeCursor = currentRawInput.substring(0, originalCursorStart);
+                    const convertedPrefix = convertPhoneticToAssamese(rawInputBeforeCursor); 
+                    let newCursorPos = convertedPrefix.length;
+
+                    mainTextarea.removeEventListener('input', handlePhoneticInput);
+                    mainTextarea.value = assameseText;
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                    
+                    try {
+                        mainTextarea.selectionStart = mainTextarea.selectionEnd = newCursorPos;
+                    } catch (e) {
+                        mainTextarea.selectionStart = mainTextarea.selectionEnd = assameseText.length;
+                    }
+                    previousPhoneticInput = currentRawInput;
+                }
+            }
+
+            copyButton.addEventListener('click', () => {
+                if (!mainTextarea.value) return;
+                navigator.clipboard.writeText(mainTextarea.value)
+                    .then(() => {
+                        const originalText = copyButton.textContent;
+                        copyButton.textContent = 'কপি কৰা হ\'ল!';
+                        copyButton.disabled = true;
+                        setTimeout(() => {
+                            copyButton.textContent = originalText;
+                            copyButton.disabled = false;
+                        }, 1500);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                        mainTextarea.select(); 
+                        try {
+                            document.execCommand('copy'); 
+                            const originalText = copyButton.textContent;
+                            copyButton.textContent = 'কপি কৰা হ\'ল (ফলবেক)!';
+                            copyButton.disabled = true;
+                            setTimeout(() => {
+                                copyButton.textContent = originalText;
+                                copyButton.disabled = false;
+                            }, 2000);
+                        } catch (e) {
+                             alert('কপি কৰাত ব্যৰ্থ। অনুগ্ৰহ কৰি নিজে কপি কৰক।');
+                        }
+                        window.getSelection().removeAllRanges(); 
+                    });
+                mainTextarea.focus();
+            });
+
+            function initializeApp() {
+                createOnScreenKeyboard();
+                if (currentMode === 'onscreen') {
+                    mainTextarea.readOnly = true;
+                    mainTextarea.placeholder = "অন-স্ক্ৰীন কীৰ্বড ব্যৱহাৰ কৰক";
+                    onScreenKeyboardArea.classList.remove('hidden');
+                    phoneticInstructions.classList.add('hidden');
+                    statusMessage.textContent = 'মোড: অন-স্ক্ৰীন কীৰ্বড';
+                    toggleModeButton.textContent = 'ফোনেটিক মোডলৈ যাওক';
+                } else { 
+                    mainTextarea.readOnly = false;
+                    mainTextarea.placeholder = "ফোনেটিকভাৱে টাইপ কৰক (যেনেঃ মৰম)";
+                    onScreenKeyboardArea.classList.add('hidden');
+                    phoneticInstructions.classList.remove('hidden');
+                    statusMessage.textContent = 'মোড: ফোনেটিক টাইপিং';
+                    toggleModeButton.textContent = 'অন-স্ক্ৰীন কীৰ্বডলৈ যাওক';
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                }
+                mainTextarea.focus();
+            }
+            initializeApp();
+        });
+    </script>
+</body>
+</html>

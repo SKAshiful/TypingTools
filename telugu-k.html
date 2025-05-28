@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Telugu Typing Tool</title>
+    <style>
+        :root {
+            --bg-color: #261C15; /* Dark Brown */
+            --surface-color: #3E2C21; /* Medium Brown */
+            --text-color: #F5EFE6; /* Off-white / Cream */
+            --primary-color: #FF8C00; /* Dark Orange */
+            --primary-hover-color: #E67E00; /* Darker Orange for hover */
+            --secondary-color: #5A3E30; /* Muted Brown */
+            --secondary-hover-color: #6B4A3A; /* Lighter Muted Brown */
+            --border-color: #503C30; /* Brownish Border */
+            --font-telugu: 'Noto Sans Telugu', 'Gautami', 'Pothana2000', Arial, sans-serif; /* Telugu Fonts */
+            --font-latin: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-latin);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px; /* Slightly reduced body padding */
+        }
+
+        .app-header {
+            width: 100%;
+            max-width: 800px; /* Slightly reduced max-width for better fit */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px; /* Reduced margin */
+            padding: 0 5px;
+        }
+
+        .app-header h1 {
+            font-size: 1.3em; /* Adjusted */
+            color: var(--primary-color);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            font-family: var(--font-telugu);
+        }
+
+        .back-button {
+            padding: 7px 12px; /* Adjusted */
+            font-size: 0.85em; /* Adjusted */
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            font-family: var(--font-telugu);
+        }
+        .back-button:hover {
+            background-color: var(--secondary-hover-color);
+        }
+
+        .container {
+            background-color: var(--surface-color);
+            padding: 12px; /* Adjusted */
+            border-radius: 8px; /* Adjusted */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+            width: 100%;
+            max-width: 800px; /* Matched header max-width */
+        }
+
+        .main-textarea {
+            width: 100%;
+            min-height: 120px; /* Adjusted */
+            font-size: 1.4em; /* Adjusted */
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin-bottom: 12px;
+            font-family: var(--font-telugu);
+            resize: vertical;
+        }
+        .main-textarea::placeholder {
+            color: #998273;
+            font-family: var(--font-telugu);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px; /* Adjusted */
+        }
+
+        .controls button {
+            padding: 8px 12px; /* Adjusted */
+            font-size: 0.85em; /* Adjusted */
+            font-family: var(--font-telugu);
+            border: none;
+            border-radius: 5px; /* Adjusted */
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: #111;
+            transition: background-color 0.2s, transform 0.1s;
+            font-weight: 600;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+        }
+        /* ... rest of control button styles ... */
+
+
+        .status-message {
+            text-align: center;
+            margin-bottom: 12px;
+            font-style: italic;
+            color: #BEA697;
+            font-size: 0.85em; /* Adjusted */
+            font-family: var(--font-telugu);
+        }
+
+        .instructions.hidden {
+             display: none !important;
+        }
+        .instructions {
+            background-color: rgba(0,0,0,0.1);
+            padding: 8px; /* Adjusted */
+            border-radius: 5px;
+            margin-top: 8px;
+            font-size: 0.75em; /* Adjusted */
+            border: 1px solid var(--border-color);
+            text-align: center;
+            font-family: var(--font-telugu);
+        }
+        .instructions code {
+            background-color: rgba(255,255,255,0.1);
+            padding: 1px 4px; /* Adjusted */
+            border-radius: 3px;
+            font-family: monospace;
+            color: #c0c0c0;
+        }
+
+
+        .keyboard-area {
+            border: 1px solid var(--border-color);
+            padding: 8px; /* Adjusted */
+            border-radius: 6px;
+            background-color: var(--bg-color);
+        }
+
+        .keyboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px; /* Reduced gap */
+            justify-content: center;
+        }
+
+        .keyboard-row {
+            display: flex;
+            width: 100%;
+            margin-bottom: 3px; /* Reduced margin */
+            gap: 3px; /* Reduced gap */
+        }
+
+        .keyboard button {
+            font-family: var(--font-telugu);
+            font-size: clamp(0.8em, 2.5vw, 1.1em); /* Fine-tuned clamp */
+            padding: 6px 0; /* Adjusted padding */
+            flex-grow: 1;
+            flex-basis: 0;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            background-color: var(--surface-color);
+            color: var(--text-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+            min-width: 26px; /* Adjusted min-width */
+            height: 38px; /* Adjusted height */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1; /* Ensure text fits vertically */
+        }
+        .keyboard button:hover {
+            background-color: var(--secondary-hover-color);
+            border-color: var(--primary-color);
+        }
+        .keyboard button:active {
+            background-color: var(--primary-color);
+            color: #111;
+            transform: translateY(1px);
+        }
+
+        .keyboard button.special {
+            background-color: var(--secondary-color);
+            font-family: var(--font-latin);
+            font-size: clamp(0.65em, 1.8vw, 0.85em); /* Adjusted */
+            flex-grow: 1.3; /* Adjusted */
+        }
+        .keyboard button.spacebar {
+            flex-grow: 4; /* Adjusted */
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Responsive Adjustments already made more aggressive above */
+        @media (max-width: 400px) { /* Added a more specific small breakpoint */
+            .keyboard button {
+                min-width: 22px; /* Further reduce for very small screens */
+                height: 36px;
+                font-size: clamp(0.7em, 2.2vw, 1em);
+            }
+             .keyboard button.special {
+                font-size: clamp(0.6em, 1.6vw, 0.8em);
+            }
+            .app-header h1 { font-size: 1em; }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <h1>తెలుగు టైపింగ్ సాధనం</h1>
+        <a href="index.html" class="back-button">వెనుకకు</a>
+    </header>
+
+    <div class="container">
+        <textarea id="mainTextarea" class="main-textarea" placeholder="ఇక్కడ టైప్ చేయండి..."></textarea>
+
+        <div class="controls">
+            <button id="toggleModeButton">ఫోనెటిక్ మోడ్‌కు మారండి</button>
+            <button id="copyButton" class="secondary">కాపీ చేయండి</button>
+        </div>
+
+        <div id="statusMessage" class="status-message">మోడ్: ఆన్-స్క్రీన్ కీబోర్డ్</div>
+
+        <div id="phoneticInstructions" class="instructions hidden">
+            <p>ఫోనెటిక్ మోడ్ సక్రియం చేయబడింది. (ఉదా: <code>k</code> -> క, <code>X</code> -> ్)</p>
+        </div>
+
+        <div id="onScreenKeyboardArea" class="keyboard-area">
+            <div id="teluguKeyboard" class="keyboard">
+                <!-- Telugu Keyboard buttons will be generated here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mainTextarea = document.getElementById('mainTextarea');
+            const toggleModeButton = document.getElementById('toggleModeButton');
+            const copyButton = document.getElementById('copyButton');
+            const onScreenKeyboardArea = document.getElementById('onScreenKeyboardArea');
+            const phoneticInstructions = document.getElementById('phoneticInstructions');
+            const keyboardContainer = document.getElementById('teluguKeyboard');
+            const statusMessage = document.getElementById('statusMessage');
+
+            let currentMode = 'onscreen';
+            let previousPhoneticInput = "";
+
+            const phoneticMap = {
+                'AU': { default: 'ఔ', matra: 'ౌ' }, 'au': { default: 'ఔ', matra: 'ౌ' },
+                'AI': { default: 'ఐ', matra: 'ై' }, 'ai': { default: 'ఐ', matra: 'ై' },
+                'OO': { default: 'ఓ', matra: 'ో' }, 'O': { default: 'ఓ', matra: 'ో' },
+                'oo': { default: 'ఊ', matra: 'ూ' }, 'UU': { default: 'ఊ', matra: 'ూ' },
+                'EE': { default: 'ఏ', matra: 'ే' }, 'E': { default: 'ఏ', matra: 'ే' },
+                'ii': { default: 'ఈ', matra: 'ీ' }, 'II': { default: 'ఈ', matra: 'ీ' },
+                'aa': { default: 'ఆ', matra: 'ా' }, 'AA': { default: 'ఆ', matra: 'ా' },
+                'a':  { default: 'అ', matra: '' },
+                'i':  { default: 'ఇ', matra: 'ి' },
+                'u':  { default: 'ఉ', matra: 'ు' },
+                'e':  { default: 'ఎ', matra: 'ె' },
+                'o':  { default: 'ఒ', matra: 'ొ' },
+                'Ru': { default: 'ఋ', matra: 'ృ' }, 'R^u': { default: 'ఋ', matra: 'ృ' },
+                'RU': { default: 'ౠ', matra: 'ౄ' }, 'R^U': { default: 'ౠ', matra: 'ౄ' },
+                'kh': 'ఖ', 'Kh': 'ఖ', 'gh': 'ఘ', 'Gh': 'ఘ', 'Ch': 'ఛ', 'chh': 'ఛ',
+                'jh': 'ఝ', 'Jh': 'ఝ', 'Th': 'ఠ', 'Dh': 'ఢ', 'th': 'థ', 'dh': 'ధ',
+                'ph': 'ఫ', 'Ph': 'ఫ', 'f': 'ఫ', 'F': 'ఫ', 'bh': 'భ', 'Bh': 'భ',
+                'k': 'క', 'K': 'క', 'q': 'క', 'Q': 'క', 'g': 'గ', 'G': 'గ',
+                'ng': 'ఙ', 'Nga': 'ఙ', 'ch': 'చ', 'C': 'చ', 'j': 'జ', 'J': 'జ', 'z': 'జ', 'Z': 'జ',
+                'Ny': 'ఞ', 'jna':'ఞ', 'Nya':'ఞ', 'T': 'ట', 'D': 'డ', 'N': 'ణ',
+                't': 'త', 'd': 'ద', 'n': 'న', 'p': 'ప', 'P': 'ప', 'b': 'బ', 'B': 'బ',
+                'm': 'మ', 'M': 'మ', 'y': 'య', 'Y': 'య', 'r': 'ర', 'R': 'ర',
+                'l': 'ల', 'L': 'ల', 'La': 'ళ', 'v': 'వ', 'V': 'వ', 'w': 'వ', 'W': 'వ',
+                'S': 'శ', 'sh': 'శ', 'Sh': 'ష', 'sha': 'ష', 's': 'స', 'h': 'హ',
+                'virama': '్', 'pollu': '్', 'X': '్',
+                'anusvara': 'ం', 'sunna': 'ం', 'M': 'ం', // M for sunna is common
+                'visarga': 'ః', 'H:': 'ః', ':': 'ః',
+                'ksh': 'క్ష', 'kSh': 'క్ష', 'jn': 'జ్ఞ', 'jny': 'జ్ఞ', 'gny':'జ్ఞ',
+                'sri': 'శ్రీ', 'shree': 'శ్రీ',
+                '..': '.', '$': '₹', '?': '?', '!': '!'
+            };
+
+            const teluguConsonants = "కఖగఘఙచఛజఝఞటఠడఢణతథదధనపఫబభమయరలవశషసహళక్షజ్ఞ";
+            const isTeluguConsonant = char => teluguConsonants.includes(char);
+
+            function convertPhoneticToTelugu(inputText) {
+                let output = "";
+                let i = 0;
+                const len = inputText.length;
+                const phoneticKeys = Object.keys(phoneticMap).sort((a, b) => b.length - a.length);
+                while (i < len) {
+                    let matched = false;
+                    for (const key of phoneticKeys) {
+                        if (inputText.substring(i).startsWith(key)) {
+                            const rule = phoneticMap[key];
+                            let charToAdd = "";
+                            if (typeof rule === 'string') {
+                                if (rule === '్' && output.length > 0 && isTeluguConsonant(output[output.length - 1])) {
+                                    charToAdd = rule;
+                                } else if (isTeluguConsonant(rule)) {
+                                    charToAdd = rule;
+                                } else {
+                                     charToAdd = rule;
+                                }
+                            } else {
+                                const lastCharOutput = output.length > 0 ? output[output.length - 1] : null;
+                                if (lastCharOutput && isTeluguConsonant(lastCharOutput) && rule.matra !== undefined) {
+                                    if (key === 'a' && rule.matra === '') {
+                                        if (output.endsWith('్')) {
+                                            output = output.substring(0, output.length -1);
+                                        }
+                                        charToAdd = '';
+                                    } else {
+                                        if (output.endsWith('్')) {
+                                           output = output.substring(0, output.length -1);
+                                        }
+                                        charToAdd = rule.matra;
+                                    }
+                                } else {
+                                    charToAdd = rule.default;
+                                }
+                            }
+                            output += charToAdd;
+                            i += key.length;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        output += inputText[i];
+                        i++;
+                    }
+                }
+                return output;
+            }
+
+            // --- Revised On-Screen Telugu Keyboard Logic ---
+            const teluguKeyboardLayout = [
+                // Achchulu (Vowels)
+                ['అ', 'ఆ', 'ఇ', 'ఈ', 'ఉ', 'ఊ', 'ఋ', 'ౠ'],
+                ['ఎ', 'ఏ', 'ఐ', 'ఒ', 'ఓ', 'ఔ', 'అం', 'అః'],
+                // Hallulu (Consonants)
+                ['క', 'ఖ', 'గ', 'ఘ', 'ఙ',  'చ', 'ఛ', 'జ', 'ఝ', 'ఞ'],
+                ['ట', 'ఠ', 'డ', 'ఢ', 'ణ',  'త', 'థ', 'ద', 'ధ', 'న'],
+                ['ప', 'ఫ', 'బ', 'భ', 'మ',  'య', 'ర', 'ల', 'వ', 'శ'],
+                ['ష', 'స', 'హ', 'ళ',      'క్ష', 'జ్ఞ', 'శ్రీ'], // Added శ్రీ
+                // Gunintalu (Matras) & Pollu
+                ['ా', 'ి', 'ీ', 'ు', 'ూ', 'ృ', 'ౄ'],
+                ['ె', 'ే', 'ై', 'ొ', 'ో', 'ౌ', '్'],
+                // Numerals & Controls
+                ['౦', '౧', '౨', '౩', '౪', '౫', '౬', '౭', '౮', '౯'],
+                ['?', '!', ',', '.', '₹', 'Backspace', 'Space', 'Clear']
+            ];
+
+
+            function createOnScreenKeyboard() {
+                keyboardContainer.innerHTML = '';
+                teluguKeyboardLayout.forEach(rowKeys => {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.classList.add('keyboard-row');
+                    rowKeys.forEach(key => {
+                        const button = document.createElement('button');
+                        button.textContent = key;
+                        if (['Backspace', 'Clear', 'Space'].includes(key)) {
+                            button.classList.add('special');
+                            if (key === 'Space') button.classList.add('spacebar');
+                        } else if (['?', '!', '₹', ',', '.'].includes(key) || (key >= '0' && key <= '9' && key.length === 1 && !teluguKeyboardLayout.flat().includes(key))){
+                             button.classList.add('special');
+                             button.style.fontFamily = 'var(--font-latin)';
+                        }
+                        button.addEventListener('click', () => handleOnScreenKey(key));
+                        rowDiv.appendChild(button);
+                    });
+                    keyboardContainer.appendChild(rowDiv);
+                });
+            }
+
+            function handleOnScreenKey(key) {
+                const cursorPos = mainTextarea.selectionStart;
+                const text = mainTextarea.value;
+                switch (key) {
+                    case 'Backspace':
+                        if (cursorPos > 0) {
+                            mainTextarea.value = text.substring(0, cursorPos - 1) + text.substring(mainTextarea.selectionEnd);
+                            mainTextarea.selectionStart = mainTextarea.selectionEnd = cursorPos - 1;
+                        }
+                        break;
+                    case 'Clear':
+                        mainTextarea.value = '';
+                        break;
+                    case 'Space':
+                        insertAtCursor(mainTextarea, ' ');
+                        break;
+                    default:
+                        insertAtCursor(mainTextarea, key);
+                        break;
+                }
+                mainTextarea.focus();
+            }
+
+            function insertAtCursor(textarea, textToInsert) {
+                const startPos = textarea.selectionStart;
+                const endPos = textarea.selectionEnd;
+                const scrollTop = textarea.scrollTop;
+                textarea.value = textarea.value.substring(0, startPos) +
+                                 textToInsert +
+                                 textarea.value.substring(endPos, textarea.value.length);
+                textarea.selectionStart = textarea.selectionEnd = startPos + textToInsert.length;
+                textarea.scrollTop = scrollTop;
+            }
+
+            toggleModeButton.addEventListener('click', () => {
+                if (currentMode === 'onscreen') {
+                    currentMode = 'phonetic';
+                    toggleModeButton.textContent = 'ఆన్-స్క్రీన్ కీబోర్డ్‌కు మారండి';
+                    statusMessage.textContent = 'మోడ్: ఫోనెటిక్ టైపింగ్';
+                    onScreenKeyboardArea.classList.add('hidden');
+                    phoneticInstructions.classList.remove('hidden');
+                    mainTextarea.readOnly = false;
+                    mainTextarea.placeholder = "ఫోనెటిక్‌గా టైప్ చేయండి (ఉదా: na peru)";
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                } else {
+                    currentMode = 'onscreen';
+                    toggleModeButton.textContent = 'ఫోనెటిక్ మోడ్‌కు మారండి';
+                    statusMessage.textContent = 'మోడ్: ఆన్-స్క్రీన్ కీబోర్డ్';
+                    onScreenKeyboardArea.classList.remove('hidden');
+                    phoneticInstructions.classList.add('hidden');
+                    mainTextarea.readOnly = true;
+                    mainTextarea.placeholder = "ఆన్-స్క్రీన్ కీబోర్డ్ ఉపయోగించండి";
+                    mainTextarea.removeEventListener('input', handlePhoneticInput);
+                }
+                mainTextarea.focus();
+            });
+
+            function handlePhoneticInput() {
+                if (currentMode === 'phonetic') {
+                    const currentRawInput = mainTextarea.value;
+                    const originalCursorStart = mainTextarea.selectionStart;
+                    const teluguText = convertPhoneticToTelugu(currentRawInput);
+                    const rawInputBeforeCursor = currentRawInput.substring(0, originalCursorStart);
+                    const convertedPrefix = convertPhoneticToTelugu(rawInputBeforeCursor);
+                    let newCursorPos = convertedPrefix.length;
+                    mainTextarea.removeEventListener('input', handlePhoneticInput);
+                    mainTextarea.value = teluguText;
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                    try {
+                        mainTextarea.selectionStart = mainTextarea.selectionEnd = newCursorPos;
+                    } catch (e) {
+                        mainTextarea.selectionStart = mainTextarea.selectionEnd = teluguText.length;
+                    }
+                    previousPhoneticInput = currentRawInput;
+                }
+            }
+
+            copyButton.addEventListener('click', () => {
+                if (!mainTextarea.value) return;
+                navigator.clipboard.writeText(mainTextarea.value)
+                    .then(() => {
+                        const originalText = copyButton.textContent;
+                        copyButton.textContent = 'కాపీ చేయబడింది!';
+                        copyButton.disabled = true;
+                        setTimeout(() => {
+                            copyButton.textContent = originalText;
+                            copyButton.disabled = false;
+                        }, 1500);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                        mainTextarea.select();
+                        try {
+                            document.execCommand('copy');
+                            const originalText = copyButton.textContent;
+                            copyButton.textContent = 'కాపీ చేయబడింది (fallback)!';
+                            copyButton.disabled = true;
+                            setTimeout(() => {
+                                copyButton.textContent = originalText;
+                                copyButton.disabled = false;
+                            }, 2000);
+                        } catch (e) {
+                             alert('కాపీ చేయడం విఫలమైంది. దయచేసి మీరే కాపీ చేయండి.');
+                        }
+                        window.getSelection().removeAllRanges();
+                    });
+                mainTextarea.focus();
+            });
+
+            function initializeApp() {
+                createOnScreenKeyboard();
+                if (currentMode === 'onscreen') {
+                    mainTextarea.readOnly = true;
+                    mainTextarea.placeholder = "ఆన్-స్క్రీన్ కీబోర్డ్ ఉపయోగించండి";
+                    onScreenKeyboardArea.classList.remove('hidden');
+                    phoneticInstructions.classList.add('hidden');
+                    statusMessage.textContent = 'మోడ్: ఆన్-స్క్రీన్ కీబోర్డ్';
+                    toggleModeButton.textContent = 'ఫోనెటిక్ మోడ్‌కు మారండి';
+                } else {
+                    mainTextarea.readOnly = false;
+                    mainTextarea.placeholder = "ఫోనెటిక్‌గా టైప్ చేయండి (ఉదా: na peru)";
+                    onScreenKeyboardArea.classList.add('hidden');
+                    phoneticInstructions.classList.remove('hidden');
+                    statusMessage.textContent = 'మోడ్: ఫోనెటిక్ టైపింగ్';
+                    toggleModeButton.textContent = 'ఆన్-స్క్రీన్ కీబోర్డ్‌కు మారండి';
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                }
+                mainTextarea.focus();
+            }
+            initializeApp();
+        });
+    </script>
+</body>
+</html>

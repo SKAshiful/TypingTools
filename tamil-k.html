@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>நவீன தமிழ் தட்டச்சு கருவி</title>
+    <style>
+        :root {
+            --bg-color: #261C15; /* Dark Brown */
+            --surface-color: #3E2C21; /* Medium Brown */
+            --text-color: #F5EFE6; /* Off-white / Cream */
+            --primary-color: #FF8C00; /* Dark Orange */
+            --primary-hover-color: #E67E00; /* Darker Orange for hover */
+            --secondary-color: #5A3E30; /* Muted Brown */
+            --secondary-hover-color: #6B4A3A; /* Lighter Muted Brown */
+            --border-color: #503C30; /* Brownish Border */
+            --font-tamil: 'Noto Sans Tamil', 'Catamaran', 'Latha', Arial, sans-serif; /* Tamil Fonts */
+            --font-latin: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-latin);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .app-header {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 0 5px;
+        }
+
+        .app-header h1 {
+            font-size: 1.3em;
+            color: var(--primary-color);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            font-family: var(--font-tamil);
+        }
+
+        .back-button {
+            padding: 7px 12px;
+            font-size: 0.85em;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            font-family: var(--font-tamil);
+        }
+        .back-button:hover {
+            background-color: var(--secondary-hover-color);
+        }
+
+        .container {
+            background-color: var(--surface-color);
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .main-textarea {
+            width: 100%;
+            min-height: 120px;
+            font-size: 1.5em; /* Good size for Tamil */
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin-bottom: 12px;
+            font-family: var(--font-tamil); /* Tamil font for textarea */
+            resize: vertical;
+        }
+        .main-textarea::placeholder {
+            color: #998273;
+            font-family: var(--font-tamil);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .controls button {
+            padding: 8px 12px;
+            font-size: 0.9em; /* Adjusted for Tamil text */
+            font-family: var(--font-tamil); /* Tamil for button text */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: #111;
+            transition: background-color 0.2s, transform 0.1s;
+            font-weight: 600;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+        }
+        .controls button:hover {
+            background-color: var(--primary-hover-color);
+        }
+        .controls button:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .controls button.secondary {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+        .controls button.secondary:hover {
+            background-color: var(--secondary-hover-color);
+        }
+
+        .status-message {
+            text-align: center;
+            margin-bottom: 12px;
+            font-style: italic;
+            color: #BEA697;
+            font-size: 0.85em;
+            font-family: var(--font-tamil);
+        }
+
+        .instructions.hidden {
+             display: none !important;
+        }
+        .instructions {
+            background-color: rgba(0,0,0,0.1);
+            padding: 8px;
+            border-radius: 5px;
+            margin-top: 8px;
+            font-size: 0.75em;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            font-family: var(--font-tamil);
+        }
+        .instructions code {
+            background-color: rgba(255,255,255,0.1);
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-family: monospace; /* Keep monospace for code */
+            color: #c0c0c0;
+        }
+
+
+        .keyboard-area {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            border-radius: 6px;
+            background-color: var(--bg-color);
+        }
+
+        .keyboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            justify-content: center;
+        }
+
+        .keyboard-row {
+            display: flex;
+            width: 100%;
+            margin-bottom: 3px;
+            gap: 3px;
+        }
+
+        .keyboard button {
+            font-family: var(--font-tamil); /* Tamil font for keys */
+            font-size: clamp(0.8em, 2.5vw, 1.1em);
+            padding: 6px 0;
+            flex-grow: 1;
+            flex-basis: 0;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            background-color: var(--surface-color);
+            color: var(--text-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+            min-width: 26px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        .keyboard button:hover {
+            background-color: var(--secondary-hover-color);
+            border-color: var(--primary-color);
+        }
+        .keyboard button:active {
+            background-color: var(--primary-color);
+            color: #111;
+            transform: translateY(1px);
+        }
+
+        .keyboard button.special {
+            background-color: var(--secondary-color);
+            font-family: var(--font-latin); /* Latin for special keys text */
+            font-size: clamp(0.65em, 1.8vw, 0.85em);
+            flex-grow: 1.3;
+        }
+        .keyboard button.spacebar {
+            flex-grow: 4;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 400px) {
+            .keyboard button {
+                min-width: 22px;
+                height: 36px;
+                font-size: clamp(0.7em, 2.2vw, 1em);
+            }
+             .keyboard button.special {
+                font-size: clamp(0.6em, 1.6vw, 0.8em);
+            }
+            .app-header h1 { font-size: 1em; }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <h1>தமிழ் தட்டச்சு கருவி</h1>
+        <a href="index.html" class="back-button">பின்செல்</a>
+    </header>
+
+    <div class="container">
+        <textarea id="mainTextarea" class="main-textarea" placeholder="இங்கே தட்டச்சு செய்க..."></textarea>
+
+        <div class="controls">
+            <button id="toggleModeButton">ஒலிப்பு முறைக்கு மாறவும்</button>
+            <button id="copyButton" class="secondary">நகலெடு</button>
+        </div>
+
+        <div id="statusMessage" class="status-message">முறை: திரை விசைப்பலகை</div>
+
+        <div id="phoneticInstructions" class="instructions hidden">
+            <p>ஒலிப்பு முறை செயலில் உள்ளது. (உதா: <code>k</code> -> க, <code>X</code> -> ்)</p>
+        </div>
+
+        <div id="onScreenKeyboardArea" class="keyboard-area">
+            <div id="tamilKeyboard" class="keyboard">
+                <!-- Tamil Keyboard buttons will be generated here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mainTextarea = document.getElementById('mainTextarea');
+            const toggleModeButton = document.getElementById('toggleModeButton');
+            const copyButton = document.getElementById('copyButton');
+            const onScreenKeyboardArea = document.getElementById('onScreenKeyboardArea');
+            const phoneticInstructions = document.getElementById('phoneticInstructions');
+            const keyboardContainer = document.getElementById('tamilKeyboard'); // Changed ID
+            const statusMessage = document.getElementById('statusMessage');
+
+            let currentMode = 'onscreen';
+            let previousPhoneticInput = "";
+
+            // --- Tamil Phonetic Conversion Logic ---
+            const phoneticMap = {
+                // Vowels (Uyir Ezhuthukkal) - Standalone and Matras
+                'aa': { default: 'ஆ', matra: 'ா' }, 'A': { default: 'ஆ', matra: 'ா' },
+                'ee': { default: 'ஈ', matra: 'ீ' }, 'I': { default: 'ஈ', matra: 'ீ' },
+                'oo': { default: 'ஊ', matra: 'ூ' }, 'U': { default: 'ஊ', matra: 'ூ' },
+                'ai': { default: 'ஐ', matra: 'ை' },
+                'au': { default: 'ஔ', matra: 'ௌ' }, 'ow': { default: 'ஔ', matra: 'ௌ' },
+                'a':  { default: 'அ', matra: '' }, 
+                'i':  { default: 'இ', matra: 'ி' },
+                'u':  { default: 'உ', matra: 'ு' },
+                'e':  { default: 'எ', matra: 'ெ' },
+                'E':  { default: 'ஏ', matra: 'ே' }, 
+                'o':  { default: 'ஒ', matra: 'ொ' },
+                'O':  { default: 'ஓ', matra: 'ோ' }, 
+
+                // Consonants (Mei Ezhuthukkal)
+                'kh': 'க', 'gh': 'க', 
+                'k': 'க', 'g': 'க',
+                'ng': 'ங', 'nG': 'ங',
+                'ch': 'ச', 
+                'jh': 'ச', 
+                'J': 'ஜ', 'j': 'ஜ', 
+                'nj': 'ஞ', 'Gn': 'ஞ', 'NY': 'ஞ',
+                'Th': 'ட', 'Dh': 'ட', 
+                'T': 'ட', 'D': 'ட',
+                'N': 'ண', 
+                'th': 'த', 'dh': 'த',
+                't': 'த', 'd': 'த',
+                'n': 'ந', 
+                'nn': 'ன', 
+                'ph': 'ப', 'bh': 'ப', 
+                'p': 'ப', 'f': 'ப', 
+                'b': 'ப',
+                'm': 'ம', 'M': 'ம',
+                'y': 'ய', 'Y': 'ய',
+                'r': 'ர',
+                'R': 'ற', 
+                'l': 'ல', 
+                'L': 'ள', 
+                'zh': 'ழ', 
+                'v': 'வ', 'w': 'வ', 'V': 'வ',
+                'sh': 'ஷ', 'Sh': 'ஷ', 
+                'S': 'ஸ',            
+                's': 'ச',            
+                'h': 'ஹ', 'H': 'ஹ',  
+
+                // Pulli (makes consonant pure)
+                'X': '்', 'pulli': '்',
+
+                // Aytham
+                'q': 'ஃ', 
+                'QH': 'ஃ', // Common alternative for aytham if 'q' is hard to find
+
+                // Common sequences / Grantha conjuncts
+                'ksh': 'க்ஷ', 'kSh': 'க்ஷ', 
+                'Sri': 'ஸ்ரீ', 'shri': 'ஸ்ரீ', 'Shree': 'ஸ்ரீ',
+                
+                // Punctuation
+                '..': '.', 
+                '.': '.',  
+                '$': '₹', 
+                '?': '?', '!': '!'
+            };
+
+            const tamilConsonants = "கஙசஞடணதநபமயரலவழளறனஸஷஜஹ";
+            const isTamilConsonant = char => tamilConsonants.includes(char);
+
+            function convertPhoneticToTamil(inputText) {
+                let output = "";
+                let i = 0;
+                const len = inputText.length;
+                const phoneticKeys = Object.keys(phoneticMap).sort((a, b) => b.length - a.length);
+
+                while (i < len) {
+                    let matched = false;
+                    for (const key of phoneticKeys) {
+                        if (inputText.substring(i).startsWith(key)) {
+                            const rule = phoneticMap[key];
+                            let charToAdd = "";
+
+                            if (typeof rule === 'string') { // Consonant, pulli, Aytham, or punctuation
+                                if (rule === '்' && output.length > 0) {
+                                    const lastChar = output[output.length - 1];
+                                    if (isTamilConsonant(lastChar) && lastChar !== '்') { // Add pulli if last is consonant and not already pulli
+                                        charToAdd = rule;
+                                    } else {
+                                        // Avoid adding pulli if not after a base consonant or if already there
+                                        // This case might mean 'X' typed in wrong context, could ignore or pass 'X'
+                                    }
+                                } else if (isTamilConsonant(rule)) {
+                                    charToAdd = rule;
+                                } else { // Punctuation, Aytham etc.
+                                    charToAdd = rule;
+                                }
+                            } else { // Vowel object {default, matra}
+                                const lastCharOutput = output.length > 0 ? output[output.length - 1] : null;
+                                const secondLastCharOutput = output.length > 1 ? output[output.length - 2] : null;
+                                let lastIsConsonantBase = false; // e.g., க (ka)
+                                let lastIsPulledConsonant = false; // e.g., க் (k)
+
+                                if (lastCharOutput) {
+                                    if (isTamilConsonant(lastCharOutput)) {
+                                        lastIsConsonantBase = true;
+                                    } else if (lastCharOutput === '்' && secondLastCharOutput && isTamilConsonant(secondLastCharOutput)) {
+                                        lastIsPulledConsonant = true;
+                                    }
+                                }
+
+                                if ((lastIsConsonantBase || lastIsPulledConsonant) && rule.matra !== undefined) {
+                                    if (key === 'a' && rule.matra === '') { // 'a' vowel
+                                        if (lastIsPulledConsonant) { // Ends with ் (e.g., க்)
+                                            output = output.substring(0, output.length - 1); // Remove the pulli: க் -> க
+                                        }
+                                        charToAdd = ''; // 'a' is inherent, no matra char added
+                                    } else { // Other vowels (i, u, e, etc.)
+                                        if (lastIsPulledConsonant) { // Ends with ் (e.g., க்)
+                                           output = output.substring(0, output.length - 1); // Remove pulli: க் -> க
+                                        }
+                                        charToAdd = rule.matra; // Add ி, ு, ெ etc.
+                                    }
+                                } else { // Vowel is standalone
+                                    charToAdd = rule.default; // அ, ஆ, இ etc.
+                                }
+                            }
+                            output += charToAdd;
+                            i += key.length;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        if (/[0-9.,!?@#$%^&*(){}[\];:"'<>/\\|`~+\-=\s]/.test(inputText[i])) {
+                           output += inputText[i];
+                        } else {
+                           output += inputText[i]; // Pass through unmatched characters
+                        }
+                        i++;
+                    }
+                }
+                return output;
+            }
+
+            // --- On-Screen Tamil Keyboard Logic ---
+            const tamilKeyboardLayout = [
+                ['அ', 'ஆ', 'இ', 'ஈ', 'உ', 'ஊ', 'எ', 'ஏ', 'ஐ', 'ஒ', 'ஓ', 'ஔ', 'ஃ'],
+                ['க', 'ங', 'ச', 'ஞ', 'ட', 'ண', 'த', 'ந', 'ப', 'ம'],
+                ['ய', 'ர', 'ல', 'வ', 'ழ', 'ள', 'ற', 'ன'],
+                ['ஸ', 'ஷ', 'ஜ', 'ஹ', 'க்ஷ', 'ஸ்ரீ', '்'], // Grantha, Conjuncts, Pulli
+                ['ா', 'ி', 'ீ', 'ு', 'ூ', 'ெ', 'ே', 'ை', 'ொ', 'ோ', 'ௌ'], // Matras
+                ['௦', '௧', '௨', '௩', '௪', '௫', '௬', '௭', '௮', '௯'], // Tamil Numerals
+                ['?', '!', ',', '.', '₹', 'Backspace', 'Space', 'Clear']
+            ];
+
+
+            function createOnScreenKeyboard() {
+                keyboardContainer.innerHTML = '';
+                tamilKeyboardLayout.forEach(rowKeys => {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.classList.add('keyboard-row');
+                    rowKeys.forEach(key => {
+                        const button = document.createElement('button');
+                        button.textContent = key;
+                        if (['Backspace', 'Clear', 'Space'].includes(key)) {
+                            button.classList.add('special');
+                            if (key === 'Space') button.classList.add('spacebar');
+                        } else if (['?', '!', '₹', ',', '.'].includes(key) || (key >= '0' && key <= '9' && key.length === 1 && !tamilKeyboardLayout.flat().includes(key))){ // Latin numerals etc
+                             button.classList.add('special');
+                             button.style.fontFamily = 'var(--font-latin)';
+                        }
+                        button.addEventListener('click', () => handleOnScreenKey(key));
+                        rowDiv.appendChild(button);
+                    });
+                    keyboardContainer.appendChild(rowDiv);
+                });
+            }
+
+            function handleOnScreenKey(key) {
+                const cursorPos = mainTextarea.selectionStart;
+                const text = mainTextarea.value;
+                switch (key) {
+                    case 'Backspace':
+                        if (cursorPos > 0) {
+                            mainTextarea.value = text.substring(0, cursorPos - 1) + text.substring(mainTextarea.selectionEnd);
+                            mainTextarea.selectionStart = mainTextarea.selectionEnd = cursorPos - 1;
+                        }
+                        break;
+                    case 'Clear':
+                        mainTextarea.value = '';
+                        break;
+                    case 'Space':
+                        insertAtCursor(mainTextarea, ' ');
+                        break;
+                    default:
+                        insertAtCursor(mainTextarea, key);
+                        break;
+                }
+                mainTextarea.focus();
+            }
+
+            function insertAtCursor(textarea, textToInsert) {
+                const startPos = textarea.selectionStart;
+                const endPos = textarea.selectionEnd;
+                const scrollTop = textarea.scrollTop;
+                textarea.value = textarea.value.substring(0, startPos) +
+                                 textToInsert +
+                                 textarea.value.substring(endPos, textarea.value.length);
+                textarea.selectionStart = textarea.selectionEnd = startPos + textToInsert.length;
+                textarea.scrollTop = scrollTop;
+            }
+
+            toggleModeButton.addEventListener('click', () => {
+                if (currentMode === 'onscreen') {
+                    currentMode = 'phonetic';
+                    toggleModeButton.textContent = 'திரை விசைப்பலகைக்கு மாறவும்';
+                    statusMessage.textContent = 'முறை: ஒலிப்பு தட்டச்சு';
+                    onScreenKeyboardArea.classList.add('hidden');
+                    phoneticInstructions.classList.remove('hidden');
+                    mainTextarea.readOnly = false;
+                    mainTextarea.placeholder = "ஒலிப்பு முறையில் தட்டச்சு செய்க (உதா: amma)";
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                } else {
+                    currentMode = 'onscreen';
+                    toggleModeButton.textContent = 'ஒலிப்பு முறைக்கு மாறவும்';
+                    statusMessage.textContent = 'முறை: திரை விசைப்பலகை';
+                    onScreenKeyboardArea.classList.remove('hidden');
+                    phoneticInstructions.classList.add('hidden');
+                    mainTextarea.readOnly = true; 
+                    mainTextarea.placeholder = "திரை விசைப்பலகையை பயன்படுத்தவும்";
+                    mainTextarea.removeEventListener('input', handlePhoneticInput);
+                }
+                mainTextarea.focus();
+            });
+
+            function handlePhoneticInput() {
+                if (currentMode === 'phonetic') {
+                    const currentRawInput = mainTextarea.value;
+                    const originalCursorStart = mainTextarea.selectionStart;
+
+                    const tamilText = convertPhoneticToTamil(currentRawInput); 
+                    
+                    const rawInputBeforeCursor = currentRawInput.substring(0, originalCursorStart);
+                    const convertedPrefix = convertPhoneticToTamil(rawInputBeforeCursor); 
+                    let newCursorPos = convertedPrefix.length;
+
+                    mainTextarea.removeEventListener('input', handlePhoneticInput);
+                    mainTextarea.value = tamilText;
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                    
+                    try {
+                        mainTextarea.selectionStart = mainTextarea.selectionEnd = newCursorPos;
+                    } catch (e) {
+                        mainTextarea.selectionStart = mainTextarea.selectionEnd = tamilText.length;
+                    }
+                    previousPhoneticInput = currentRawInput;
+                }
+            }
+
+            copyButton.addEventListener('click', () => {
+                if (!mainTextarea.value) return;
+                navigator.clipboard.writeText(mainTextarea.value)
+                    .then(() => {
+                        const originalText = copyButton.textContent;
+                        copyButton.textContent = 'நகலெடுக்கப்பட்டது!';
+                        copyButton.disabled = true;
+                        setTimeout(() => {
+                            copyButton.textContent = originalText;
+                            copyButton.disabled = false;
+                        }, 1500);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                        mainTextarea.select(); 
+                        try {
+                            document.execCommand('copy'); 
+                            const originalText = copyButton.textContent;
+                            copyButton.textContent = 'நகலெடுக்கப்பட்டது (ஃபால்பேக்)!';
+                            copyButton.disabled = true;
+                            setTimeout(() => {
+                                copyButton.textContent = originalText;
+                                copyButton.disabled = false;
+                            }, 2000);
+                        } catch (e) {
+                             alert('நகலெடுப்பது தோல்வியுற்றது. தயவுசெய்து நீங்களே நகலெடுக்கவும்.');
+                        }
+                        window.getSelection().removeAllRanges(); 
+                    });
+                mainTextarea.focus();
+            });
+
+            function initializeApp() {
+                createOnScreenKeyboard();
+                if (currentMode === 'onscreen') {
+                    mainTextarea.readOnly = true;
+                    mainTextarea.placeholder = "திரை விசைப்பலகையை பயன்படுத்தவும்";
+                    onScreenKeyboardArea.classList.remove('hidden');
+                    phoneticInstructions.classList.add('hidden');
+                    statusMessage.textContent = 'முறை: திரை விசைப்பலகை';
+                    toggleModeButton.textContent = 'ஒலிப்பு முறைக்கு மாறவும்';
+                } else { 
+                    mainTextarea.readOnly = false;
+                    mainTextarea.placeholder = "ஒலிப்பு முறையில் தட்டச்சு செய்க (உதா: amma)";
+                    onScreenKeyboardArea.classList.add('hidden');
+                    phoneticInstructions.classList.remove('hidden');
+                    statusMessage.textContent = 'முறை: ஒலிப்பு தட்டச்சு';
+                    toggleModeButton.textContent = 'திரை விசைப்பலகைக்கு மாறவும்';
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                }
+                mainTextarea.focus();
+            }
+            initializeApp();
+        });
+    </script>
+</body>
+</html>

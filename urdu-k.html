@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جدید اردو ٹائپنگ ٹول</title>
+    <style>
+        :root {
+            --bg-color: #261C15;
+            --surface-color: #3E2C21;
+            --text-color: #F5EFE6;
+            --primary-color: #FF8C00;
+            --primary-hover-color: #E67E00;
+            --secondary-color: #5A3E30;
+            --secondary-hover-color: #6B4A3A;
+            --border-color: #503C30;
+            --font-urdu: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', Arial, sans-serif;
+            --font-latin: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-urdu);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+            direction: rtl;
+        }
+
+        .app-header {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 0 5px;
+        }
+
+        .app-header h1 {
+            font-size: 1.4em; /* Adjusted */
+            color: var(--primary-color);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .back-button {
+            padding: 7px 12px;
+            font-size: 0.9em;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        .back-button:hover {
+            background-color: var(--secondary-hover-color);
+        }
+
+        .container {
+            background-color: var(--surface-color);
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+            width: 100%;
+            max-width: 800px;
+            overflow-x: hidden; /* Added to prevent horizontal scroll on container itself */
+        }
+
+        .main-textarea {
+            width: 100%;
+            min-height: 130px; /* Adjusted */
+            font-size: 1.5em; /* Adjusted */
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin-bottom: 12px;
+            resize: vertical;
+            text-align: right;
+            direction: rtl;
+        }
+        .main-textarea::placeholder {
+            color: #998273;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .controls button {
+            padding: 8px 12px;
+            font-size: 0.95em; /* Adjusted */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: #111;
+            transition: background-color 0.2s, transform 0.1s;
+            font-weight: 600;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+        }
+        .controls button:hover {
+            background-color: var(--primary-hover-color);
+        }
+        .controls button:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .controls button.secondary {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+        .controls button.secondary:hover {
+            background-color: var(--secondary-hover-color);
+        }
+
+        .status-message {
+            text-align: center;
+            margin-bottom: 12px;
+            font-style: italic;
+            color: #BEA697;
+            font-size: 0.9em;
+        }
+
+        .instructions.hidden {
+             display: none !important;
+        }
+        .instructions {
+            background-color: rgba(0,0,0,0.1);
+            padding: 8px;
+            border-radius: 5px;
+            margin-top: 8px;
+            font-size: 0.8em; /* Adjusted */
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+        .instructions p {
+            text-align: right;
+        }
+        .instructions code {
+            background-color: rgba(255,255,255,0.1);
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-family: var(--font-latin);
+            direction: ltr;
+            display: inline-block;
+            color: #c0c0c0;
+        }
+
+        .keyboard-area {
+            border: 1px solid var(--border-color);
+            padding: 8px 4px; /* Adjusted padding */
+            border-radius: 6px;
+            background-color: var(--bg-color);
+            overflow-x: auto; /* Allow horizontal scroll within keyboard area if needed, but aim to avoid */
+        }
+
+        .keyboard {
+            display: flex;
+            flex-wrap: wrap; /* Allow rows to wrap if they are too wide */
+            gap: 2px; /* Reduced gap */
+            justify-content: center;
+        }
+
+        .keyboard-row {
+            display: flex;
+            width: 100%;
+            margin-bottom: 2px; /* Reduced margin */
+            gap: 2px; /* Reduced gap */
+            flex-direction: row-reverse;
+        }
+
+        .keyboard button {
+            font-family: var(--font-urdu);
+            font-size: clamp(0.9em, 2.2vw, 1.15em); /* Adjusted font size */
+            padding: 4px 0; /* Adjusted padding */
+            flex-grow: 1;
+            flex-shrink: 1; /* Allow buttons to shrink */
+            flex-basis: 0;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            background-color: var(--surface-color);
+            color: var(--text-color);
+            border-radius: 3px; /* Smaller radius */
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+            min-width: 24px; /* Adjusted min-width */
+            height: 38px; /* Adjusted height */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            box-sizing: border-box; /* Ensure padding/border included in width/height */
+        }
+        .keyboard button:hover {
+            background-color: var(--secondary-hover-color);
+            border-color: var(--primary-color);
+        }
+        .keyboard button:active {
+            background-color: var(--primary-color);
+            color: #111;
+            transform: translateY(1px);
+        }
+
+        .keyboard button.special {
+            background-color: var(--secondary-color);
+            font-size: clamp(0.75em, 1.6vw, 0.9em); /* Adjusted */
+            flex-grow: 1.2; /* Slightly reduced grow factor */
+        }
+        .keyboard button.special[data-latin="true"] {
+            font-family: var(--font-latin);
+        }
+        .keyboard button.spacebar {
+            flex-grow: 3.5; /* Slightly reduced */
+        }
+        .keyboard button.diacritic { /* Special class for smaller diacritic buttons */
+            min-width: 22px;
+            font-size: clamp(0.8em, 2vw, 1em);
+            padding: 3px 0;
+        }
+        .keyboard button.symbol-key { /* Special class for smaller symbol buttons */
+            min-width: 22px;
+            font-size: clamp(0.75em, 1.8vw, 0.9em);
+            padding: 3px 0;
+        }
+
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 480px) {
+            .keyboard button {
+                min-width: 20px;
+                height: 36px;
+                font-size: clamp(0.8em, 2vw, 1em);
+            }
+             .keyboard button.special {
+                font-size: clamp(0.7em, 1.5vw, 0.85em);
+            }
+            .app-header h1 { font-size: 1.2em; }
+            .main-textarea { font-size: 1.3em; }
+        }
+         @media (max-width: 360px) { /* Extra small screens */
+            .keyboard button {
+                min-width: 18px;
+                height: 34px;
+                font-size: clamp(0.7em, 1.8vw, 0.9em);
+            }
+            .controls button {
+                 font-size: 0.85em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <h1>اردو ٹائپنگ ٹول</h1>
+        <a href="index.html" class="back-button">واپس</a>
+    </header>
+
+    <div class="container">
+        <textarea id="mainTextarea" class="main-textarea" placeholder="یہاں ٹائپ کریں..."></textarea>
+
+        <div class="controls">
+            <button id="toggleModeButton">صوتی موڈ پر جائیں</button>
+            <button id="copyButton" class="secondary">کاپی کریں</button>
+        </div>
+
+        <div id="statusMessage" class="status-message">موڈ: آن اسکرین کی بورڈ</div>
+
+        <div id="phoneticInstructions" class="instructions hidden">
+            <p>صوتی موڈ فعال ہے۔ (مثال: <code>k</code> &larr; ک، <code>a</code> &larr; ا، <code>aa</code> &larr; آ، <code>X</code> &larr; ْ)</p>
+        </div>
+
+        <div id="onScreenKeyboardArea" class="keyboard-area">
+            <div id="urduKeyboard" class="keyboard">
+                <!-- Urdu Keyboard buttons will be generated here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mainTextarea = document.getElementById('mainTextarea');
+            const toggleModeButton = document.getElementById('toggleModeButton');
+            const copyButton = document.getElementById('copyButton');
+            const onScreenKeyboardArea = document.getElementById('onScreenKeyboardArea');
+            const phoneticInstructions = document.getElementById('phoneticInstructions');
+            const keyboardContainer = document.getElementById('urduKeyboard');
+            const statusMessage = document.getElementById('statusMessage');
+
+            let currentMode = 'onscreen';
+
+            const phoneticMap = {
+                'aa': 'آ', 'A': 'آ', 'a': 'ا', 'i': 'ی', 'ee': 'ی', 'E': 'ی', 'u': 'و', 'oo': 'و', 'O': 'و',
+                'ai': 'ے', 'ay': 'ے', 'au': 'و', 'b': 'ب', 'p': 'پ', 't': 'ت', 'T': 'ٹ', 's': 'س',
+                'S': 'ص', 'th_s': 'ث', 'j': 'ج', 'ch': 'چ', 'h_soft': 'ح', 'kh': 'خ', 'd': 'د', 'D': 'ڈ',
+                'z': 'ز', 'Z': 'ذ', 'z_emph': 'ض', 'z_emp': 'ظ', 'r': 'ر', 'R': 'ڑ', 'sh': 'ش', 'gh': 'غ',
+                'f': 'ف', 'q': 'ق', 'k': 'ک', 'g': 'گ', 'l': 'ل', 'm': 'م', 'n': 'ن', 'N': 'ں',
+                'v': 'و', 'w': 'و', 'h': 'ہ', 'H': 'ھ', 'y': 'ی', 'bh': 'بھ', 'ph': 'پھ', 'th': 'تھ',
+                'Th': 'ٹھ', 'jh': 'جھ', 'chh': 'چھ', 'dh': 'دھ', 'Dh': 'ڈھ', 'khh': 'کھ', 'ghh': 'گھ',
+                '\'': 'ء', 'X': 'ْ', '#': 'ّ', ',': '،', ';': '؛', '?': '؟', '.': '۔',
+                '!': '!', '$': '$', '%': '%', '^': '^', '&': '&', '*': '*', '(': '(', ')': ')', '-': '-', '_': '_', '=': '=', '+': '+'
+            };
+
+            function convertPhoneticToUrdu(inputText) {
+                let output = "";
+                let i = 0;
+                const len = inputText.length;
+                const phoneticKeys = Object.keys(phoneticMap).sort((a, b) => b.length - a.length);
+
+                while (i < len) {
+                    let matched = false;
+                    for (const key of phoneticKeys) {
+                        if (inputText.substring(i).startsWith(key)) {
+                            let charToAdd = phoneticMap[key];
+                            if (key === 'a' && (i === 0 || /\s|[،؛؟۔!]/.test(output[output.length - 1] || ' '))) {
+                                charToAdd = 'ا';
+                            } else if (key === 'aa' && (i === 0 || /\s|[،؛؟۔!]/.test(output[output.length - 1] || ' '))) {
+                                charToAdd = 'آ';
+                            } else if (key === 'aa') {
+                                charToAdd = 'ا';
+                            }
+                            if (charToAdd === 'ْ' && output.endsWith('ْ')) {
+                                // Do nothing
+                            } else {
+                                output += charToAdd;
+                            }
+                            i += key.length;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        if (/[0-9]/.test(inputText[i])) {
+                           output += inputText[i];
+                        } else {
+                           output += inputText[i];
+                        }
+                        i++;
+                    }
+                }
+                return output;
+            }
+
+            const urduKeyboardLayout = [
+                ['!','@','#','$','%','^','&','*','(',')','_','+','Backspace'],
+                ['ض','ص','ث','ق','ف','غ','ع','ہ','خ','ح','ج','چ','۔'],
+                ['ش','س','ی','ب','ل','ا','ت','ن','م','ک','گ','؛','Enter'],
+                ['ظ','ط','ذ','ڈ','ز','ر','ڑ','د','ٹ','پ','و','ء','؟'],
+                ['ژ','ے','ں','Space','،']
+            ];
+            const urduNumeralsRow = ['۱','۲','۳','۴','۵','۶','۷','۸','۹','۰'];
+            const urduDiacritics = ['ْ', 'ّ', 'َ', 'ِ', 'ُ']; // Sukoon, Shadda, Zabar, Zer, Pesh
+
+
+            function createOnScreenKeyboard() {
+                keyboardContainer.innerHTML = '';
+
+                const numDiaRowDiv = document.createElement('div');
+                numDiaRowDiv.classList.add('keyboard-row');
+                urduNumeralsRow.forEach(key => {
+                     const button = document.createElement('button');
+                     button.textContent = key;
+                     button.addEventListener('click', () => handleOnScreenKey(key));
+                     numDiaRowDiv.appendChild(button);
+                });
+                urduDiacritics.forEach(key => {
+                    const button = document.createElement('button');
+                    button.textContent = key;
+                    button.classList.add('special', 'diacritic'); // Added 'diacritic' class
+                    button.addEventListener('click', () => handleOnScreenKey(key));
+                    numDiaRowDiv.appendChild(button);
+                });
+                keyboardContainer.appendChild(numDiaRowDiv);
+
+
+                urduKeyboardLayout.forEach(rowKeys => {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.classList.add('keyboard-row');
+                    rowKeys.forEach(key => {
+                        const button = document.createElement('button');
+                        button.textContent = key;
+                        if (['Backspace', 'Space', 'Enter'].includes(key)) {
+                            button.classList.add('special');
+                            button.setAttribute('data-latin', 'true');
+                            if (key === 'Space') button.classList.add('spacebar');
+                            if (key === 'Enter') button.textContent = 'فاصلہ'; // Urdu for Space
+                        } else if (['!','@','#','$','%','^','&','*','(',')','_','+'].includes(key)) {
+                            button.classList.add('special', 'symbol-key'); // Added 'symbol-key' class
+                            button.setAttribute('data-latin', 'true');
+                        }
+
+                        button.addEventListener('click', () => {
+                            if (key === 'Enter') handleOnScreenKey(' ');
+                            else handleOnScreenKey(key);
+                        });
+                        rowDiv.appendChild(button);
+                    });
+                    keyboardContainer.appendChild(rowDiv);
+                });
+            }
+
+            function handleOnScreenKey(key) {
+                const cursorPos = mainTextarea.selectionStart;
+                const text = mainTextarea.value;
+                switch (key) {
+                    case 'Backspace':
+                        if (cursorPos > 0 || mainTextarea.selectionEnd > mainTextarea.selectionStart) {
+                             const before = text.substring(0, mainTextarea.selectionStart - (mainTextarea.selectionEnd === mainTextarea.selectionStart ? 1:0) );
+                             const after = text.substring(mainTextarea.selectionEnd);
+                             mainTextarea.value = before + after;
+                             mainTextarea.selectionStart = mainTextarea.selectionEnd = before.length;
+                        }
+                        break;
+                    case 'Clear':
+                        mainTextarea.value = '';
+                        break;
+                    case 'Space':
+                        insertAtCursor(mainTextarea, ' ');
+                        break;
+                    default:
+                        insertAtCursor(mainTextarea, key);
+                        break;
+                }
+                mainTextarea.focus();
+            }
+
+            function insertAtCursor(textarea, textToInsert) {
+                const startPos = textarea.selectionStart;
+                const endPos = textarea.selectionEnd;
+                const scrollTop = textarea.scrollTop;
+                textarea.value = textarea.value.substring(0, startPos) +
+                                 textToInsert +
+                                 textarea.value.substring(endPos, textarea.value.length);
+                textarea.focus();
+                textarea.selectionStart = textarea.selectionEnd = startPos + textToInsert.length;
+                textarea.scrollTop = scrollTop;
+            }
+
+            toggleModeButton.addEventListener('click', () => {
+                if (currentMode === 'onscreen') {
+                    currentMode = 'phonetic';
+                    toggleModeButton.textContent = 'آن اسکرین کی بورڈ';
+                    statusMessage.textContent = 'موڈ: صوتی ٹائپنگ';
+                    onScreenKeyboardArea.classList.add('hidden');
+                    phoneticInstructions.classList.remove('hidden');
+                    mainTextarea.readOnly = false;
+                    mainTextarea.placeholder = "صوتی طور پر ٹائپ کریں (مثال: mera pakistan)";
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                } else {
+                    currentMode = 'onscreen';
+                    toggleModeButton.textContent = 'صوتی موڈ';
+                    statusMessage.textContent = 'موڈ: آن اسکرین کی بورڈ';
+                    onScreenKeyboardArea.classList.remove('hidden');
+                    phoneticInstructions.classList.add('hidden');
+                    mainTextarea.readOnly = true;
+                    mainTextarea.placeholder = "آن اسکرین کی بورڈ استعمال کریں";
+                    mainTextarea.removeEventListener('input', handlePhoneticInput);
+                }
+                mainTextarea.focus();
+            });
+
+             function handlePhoneticInput() {
+                if (currentMode === 'phonetic') {
+                    const currentRawInput = mainTextarea.value;
+                    const originalCursorStart = mainTextarea.selectionStart;
+                    const urduText = convertPhoneticToUrdu(currentRawInput);
+                    const rawInputBeforeCursor = currentRawInput.substring(0, originalCursorStart);
+                    const convertedPrefix = convertPhoneticToUrdu(rawInputBeforeCursor);
+                    let newCursorPos = convertedPrefix.length;
+
+                    mainTextarea.removeEventListener('input', handlePhoneticInput);
+                    mainTextarea.value = urduText;
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+
+                    try {
+                        mainTextarea.selectionStart = mainTextarea.selectionEnd = newCursorPos;
+                    } catch (e) {
+                        mainTextarea.selectionStart = mainTextarea.selectionEnd = urduText.length;
+                    }
+                }
+            }
+
+
+            copyButton.addEventListener('click', () => {
+                if (!mainTextarea.value) return;
+                navigator.clipboard.writeText(mainTextarea.value)
+                    .then(() => {
+                        const originalText = copyButton.textContent;
+                        copyButton.textContent = 'کاپی ہوگیا!';
+                        copyButton.disabled = true;
+                        setTimeout(() => {
+                            copyButton.textContent = originalText;
+                            copyButton.disabled = false;
+                        }, 1500);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                        mainTextarea.select();
+                        try {
+                            document.execCommand('copy');
+                            const originalText = copyButton.textContent;
+                            copyButton.textContent = 'کاپی ہوگیا (فال بیک)!';
+                            copyButton.disabled = true;
+                            setTimeout(() => {
+                                copyButton.textContent = originalText;
+                                copyButton.disabled = false;
+                            }, 2000);
+                        } catch (e) {
+                             alert('کاپی کرنے میں ناکام. براہ کرم خود کاپی کریں.');
+                        }
+                        window.getSelection().removeAllRanges();
+                    });
+                mainTextarea.focus();
+            });
+
+            const clearButton = document.createElement('button');
+            clearButton.textContent = 'صاف کریں';
+            clearButton.classList.add('secondary');
+            clearButton.id = 'clearButton';
+            clearButton.addEventListener('click', () => {
+                mainTextarea.value = '';
+                mainTextarea.focus();
+            });
+            // Insert clear button before the copy button for better RTL flow
+            copyButton.parentNode.insertBefore(clearButton, copyButton.nextSibling);
+
+
+            function initializeApp() {
+                createOnScreenKeyboard();
+                if (currentMode === 'onscreen') {
+                    mainTextarea.readOnly = true;
+                    mainTextarea.placeholder = "آن اسکرین کی بورڈ استعمال کریں";
+                    onScreenKeyboardArea.classList.remove('hidden');
+                    phoneticInstructions.classList.add('hidden');
+                    statusMessage.textContent = 'موڈ: آن اسکرین کی بورڈ';
+                    toggleModeButton.textContent = 'صوتی موڈ';
+                } else {
+                    mainTextarea.readOnly = false;
+                    mainTextarea.placeholder = "صوتی طور پر ٹائپ کریں (مثال: mera pakistan)";
+                    onScreenKeyboardArea.classList.add('hidden');
+                    phoneticInstructions.classList.remove('hidden');
+                    statusMessage.textContent = 'موڈ: صوتی ٹائپنگ';
+                    toggleModeButton.textContent = 'آن اسکرین کی بورڈ';
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                }
+                mainTextarea.focus();
+            }
+            initializeApp();
+        });
+    </script>
+</body>
+</html>

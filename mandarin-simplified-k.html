@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>现代汉语拼音与汉字输入工具</title>
+    <style>
+        :root {
+            --bg-color: #261C15;
+            --surface-color: #3E2C21;
+            --text-color: #F5EFE6;
+            --primary-color: #FF8C00;
+            --primary-hover-color: #E67E00;
+            --secondary-color: #5A3E30;
+            --secondary-hover-color: #6B4A3A;
+            --border-color: #503C30;
+            --font-chinese: 'Microsoft YaHei', 'SimSun', 'Noto Sans SC', sans-serif;
+            --font-latin: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-latin); /* Default to Latin for controls, specific elements use Chinese */
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .app-header {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 0 5px;
+        }
+
+        .app-header h1 {
+            font-family: var(--font-chinese);
+            font-size: 1.4em;
+            color: var(--primary-color);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .back-button {
+            font-family: var(--font-chinese);
+            padding: 7px 12px;
+            font-size: 0.9em;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        .back-button:hover {
+            background-color: var(--secondary-hover-color);
+        }
+
+        .container {
+            background-color: var(--surface-color);
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+            width: 100%;
+            max-width: 800px;
+            overflow-x: hidden;
+        }
+
+        .main-textarea {
+            width: 100%;
+            min-height: 140px;
+            font-size: 1.6em;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin-bottom: 12px;
+            resize: vertical;
+            font-family: var(--font-chinese); /* Default to Chinese for textarea */
+        }
+        .main-textarea.pinyin-mode {
+            font-family: var(--font-latin); /* Use Latin font for Pinyin mode */
+            font-size: 1.5em; /* Slightly smaller for Pinyin */
+        }
+        .main-textarea::placeholder {
+            color: #998273;
+            font-family: var(--font-chinese);
+        }
+        .main-textarea.pinyin-mode::placeholder {
+            font-family: var(--font-latin);
+        }
+
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .controls button {
+            font-family: var(--font-chinese);
+            padding: 8px 12px;
+            font-size: 0.95em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: #111;
+            transition: background-color 0.2s, transform 0.1s;
+            font-weight: 600;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+        }
+        .controls button:hover {
+            background-color: var(--primary-hover-color);
+        }
+        .controls button:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .controls button.secondary {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+        .controls button.secondary:hover {
+            background-color: var(--secondary-hover-color);
+        }
+
+        .status-message {
+            font-family: var(--font-chinese);
+            text-align: center;
+            margin-bottom: 12px;
+            font-style: italic;
+            color: #BEA697;
+            font-size: 0.9em;
+        }
+
+        .instructions.hidden {
+             display: none !important;
+        }
+        .instructions {
+            background-color: rgba(0,0,0,0.1);
+            padding: 8px;
+            border-radius: 5px;
+            margin-top: 8px;
+            font-size: 0.8em;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            font-family: var(--font-chinese);
+        }
+        .instructions p {
+            text-align: center; /* Center align for Chinese */
+        }
+        .instructions code {
+            background-color: rgba(255,255,255,0.1);
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-family: var(--font-latin);
+            color: #c0c0c0;
+        }
+
+        .keyboard-area {
+            border: 1px solid var(--border-color);
+            padding: 8px 4px;
+            border-radius: 6px;
+            background-color: var(--bg-color);
+            overflow-x: auto;
+        }
+
+        .keyboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            justify-content: center;
+        }
+
+        .keyboard-row {
+            display: flex;
+            width: 100%;
+            margin-bottom: 2px;
+            gap: 2px;
+            /* flex-direction: row-reverse; NO - Chinese is LTR */
+        }
+
+        .keyboard button {
+            font-family: var(--font-chinese);
+            font-size: clamp(0.9em, 2.2vw, 1.2em);
+            padding: 4px 0;
+            flex-grow: 1;
+            flex-shrink: 1;
+            flex-basis: 0;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            background-color: var(--surface-color);
+            color: var(--text-color);
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+            min-width: 28px; /* Adjusted for potentially wider characters */
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            box-sizing: border-box;
+        }
+        .keyboard button:hover {
+            background-color: var(--secondary-hover-color);
+            border-color: var(--primary-color);
+        }
+        .keyboard button:active {
+            background-color: var(--primary-color);
+            color: #111;
+            transform: translateY(1px);
+        }
+
+        .keyboard button.special {
+            background-color: var(--secondary-color);
+            font-size: clamp(0.75em, 1.6vw, 0.95em);
+            flex-grow: 1.3; /* Adjusted */
+            font-family: var(--font-latin); /* Special keys use Latin font by default */
+        }
+        .keyboard button.special.chinese-text { /* If special key has Chinese text */
+             font-family: var(--font-chinese);
+             font-size: clamp(0.7em, 1.5vw, 0.85em);
+        }
+        .keyboard button.spacebar {
+            flex-grow: 4;
+        }
+
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 480px) {
+            .keyboard button {
+                min-width: 24px;
+                height: 38px;
+                font-size: clamp(0.85em, 2vw, 1.1em);
+            }
+             .keyboard button.special {
+                font-size: clamp(0.7em, 1.5vw, 0.9em);
+            }
+            .app-header h1 { font-size: 1.3em; }
+            .main-textarea { font-size: 1.5em; }
+            .main-textarea.pinyin-mode { font-size: 1.4em; }
+        }
+         @media (max-width: 360px) {
+            .keyboard button {
+                min-width: 22px;
+                height: 36px;
+                font-size: clamp(0.75em, 1.8vw, 1em);
+            }
+            .controls button {
+                 font-size: 0.85em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <h1>汉语拼音与汉字输入</h1>
+        <a href="index.html" class="back-button">返回</a>
+    </header>
+
+    <div class="container">
+        <textarea id="mainTextarea" class="main-textarea" placeholder="请在此处输入汉字..."></textarea>
+
+        <div class="controls">
+            <button id="toggleModeButton">切换到拼音输入</button>
+            <button id="copyButton" class="secondary">复制</button>
+        </div>
+
+        <div id="statusMessage" class="status-message">模式：屏幕键盘 (汉字)</div>
+
+        <div id="phoneticInstructions" class="instructions hidden">
+            <p>拼音输入模式已激活。输入拼音和声调数字 (1-4)，如 <code>ma1</code> 将转换为 <code>mā</code>。<code>v</code> 代表 <code>ü</code>。</p>
+        </div>
+
+        <div id="onScreenKeyboardArea" class="keyboard-area">
+            <div id="chineseKeyboard" class="keyboard">
+                <!-- Chinese Keyboard buttons will be generated here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mainTextarea = document.getElementById('mainTextarea');
+            const toggleModeButton = document.getElementById('toggleModeButton');
+            const copyButton = document.getElementById('copyButton');
+            const onScreenKeyboardArea = document.getElementById('onScreenKeyboardArea');
+            const phoneticInstructions = document.getElementById('phoneticInstructions');
+            const keyboardContainer = document.getElementById('chineseKeyboard');
+            const statusMessage = document.getElementById('statusMessage');
+
+            let currentMode = 'onscreen'; // 'onscreen' or 'pinyin'
+
+            // --- Pinyin with Tone Marks Conversion Logic ---
+            const pinyinToneMap = {
+                'a': ['ā', 'á', 'ǎ', 'à', 'a'], 'e': ['ē', 'é', 'ě', 'è', 'e'],
+                'o': ['ō', 'ó', 'ǒ', 'ò', 'o'],
+                'i': ['ī', 'í', 'ǐ', 'ì', 'i'],
+                'u': ['ū', 'ú', 'ǔ', 'ù', 'u'],
+                'ü': ['ǖ', 'ǘ', 'ǚ', 'ǜ', 'ü'], 'v': ['ǖ', 'ǘ', 'ǚ', 'ǜ', 'ü'] // v as alias for ü
+            };
+
+            function convertPinyinWithTones(inputText) {
+                let result = inputText;
+                // Convert v to ü first
+                result = result.replace(/v/g, 'ü');
+
+                // Regex to find a vowel (or ü) followed by a tone number 1-4
+                // Ensure it handles cases like 'lve' -> 'lüe' then 'lüe3' -> 'lüě'
+                // Also handles complex finals like 'iang1', 'uang1' - tone mark goes on the main vowel 'a'.
+                // This simplified logic places tone on the vowel immediately preceding the number.
+                // A more sophisticated approach would identify the main vowel in a final.
+                const pinyinRegex = /([a-zA-ZüÜ]+)([1-4])/g;
+                result = result.replace(pinyinRegex, (match, pinyinPart, toneNumber) => {
+                    let lastVowel = '';
+                    let lastVowelIndex = -1;
+
+                    // Find the last vowel in the pinyinPart to place the tone mark
+                    // Preference: a > o > e > i > u > ü
+                    const vowelOrder = ['a', 'o', 'e', 'i', 'u', 'ü'];
+                    for (const vo of vowelOrder) {
+                        const idx = pinyinPart.lastIndexOf(vo);
+                        if (idx > lastVowelIndex) {
+                            lastVowel = vo;
+                            lastVowelIndex = idx;
+                        }
+                    }
+                    // If no vowel from vowelOrder (e.g. only 'm', 'n'), or if it's 'iu' (tone on u), 'ui' (tone on i)
+                    // This simplified logic just takes the last character if it's a vowel.
+                    if (lastVowelIndex === -1) { // Fallback: if no preferred vowel found, try any vowel from pinyinToneMap
+                        for (let k = pinyinPart.length -1; k >=0; k--) {
+                            if (pinyinToneMap[pinyinPart[k].toLowerCase()]) {
+                                lastVowel = pinyinPart[k].toLowerCase();
+                                lastVowelIndex = k;
+                                break;
+                            }
+                        }
+                    }
+
+
+                    if (lastVowel && pinyinToneMap[lastVowel]) {
+                        const tonedVowel = pinyinToneMap[lastVowel][parseInt(toneNumber) - 1];
+                        return pinyinPart.substring(0, lastVowelIndex) + tonedVowel + pinyinPart.substring(lastVowelIndex + 1);
+                    }
+                    return match; // Return original match if no vowel found or no tone mapping
+                });
+                return result;
+            }
+
+
+            // --- On-Screen Chinese Keyboard Logic ---
+            const chineseKeyboardLayout = [
+                // Punctuation and numbers are often typed using a Latin keyboard mode in China
+                // For this tool, we provide Chinese-specific punctuation and numerals.
+                ['，', '。', '？', '！', '：', '；', '（', '）', '「', '」', '、', '·'],
+                ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '百', '千', '万'],
+                ['的', '是', '不', '我', '你', '他', '她', '它', '们', '了', '吗', '呢'],
+                ['人', '中', '国', '上', '下', '左', '右', '大', '小', '多', '少', '好'],
+                ['天', '地', '生', '日', '月', '水', '火', '木', '金', '土', '学', '字'],
+                ['Backspace', 'Space', 'Clear']
+            ];
+
+
+            function createOnScreenKeyboard() {
+                keyboardContainer.innerHTML = '';
+                chineseKeyboardLayout.forEach(rowKeys => {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.classList.add('keyboard-row');
+                    rowKeys.forEach(key => {
+                        const button = document.createElement('button');
+                        button.textContent = key;
+                        if (['Backspace', 'Space', 'Clear'].includes(key)) {
+                            button.classList.add('special');
+                            if (key === 'Space') button.classList.add('spacebar');
+                            // Add Chinese text to special keys if needed for clarity
+                            if (key === 'Backspace') button.textContent = '退格';
+                            if (key === 'Space') button.textContent = '空格';
+                            if (key === 'Clear') button.textContent = '清除';
+                            button.classList.add('chinese-text');
+                        }
+                        button.addEventListener('click', () => handleOnScreenKey(key));
+                        rowDiv.appendChild(button);
+                    });
+                    keyboardContainer.appendChild(rowDiv);
+                });
+            }
+
+            function handleOnScreenKey(key) {
+                const cursorPos = mainTextarea.selectionStart;
+                const text = mainTextarea.value;
+                let effectiveKey = key;
+                if (key === '退格') effectiveKey = 'Backspace';
+                if (key === '空格') effectiveKey = 'Space';
+                if (key === '清除') effectiveKey = 'Clear';
+
+
+                switch (effectiveKey) {
+                    case 'Backspace':
+                        if (cursorPos > 0 || mainTextarea.selectionEnd > mainTextarea.selectionStart) {
+                             const before = text.substring(0, mainTextarea.selectionStart - (mainTextarea.selectionEnd === mainTextarea.selectionStart ? 1:0) );
+                             const after = text.substring(mainTextarea.selectionEnd);
+                             mainTextarea.value = before + after;
+                             mainTextarea.selectionStart = mainTextarea.selectionEnd = before.length;
+                        }
+                        break;
+                    case 'Clear':
+                        mainTextarea.value = '';
+                        break;
+                    case 'Space':
+                        insertAtCursor(mainTextarea, ' ');
+                        break;
+                    default:
+                        insertAtCursor(mainTextarea, effectiveKey);
+                        break;
+                }
+                mainTextarea.focus();
+            }
+
+            function insertAtCursor(textarea, textToInsert) {
+                const startPos = textarea.selectionStart;
+                const endPos = textarea.selectionEnd;
+                const scrollTop = textarea.scrollTop;
+                textarea.value = textarea.value.substring(0, startPos) +
+                                 textToInsert +
+                                 textarea.value.substring(endPos, textarea.value.length);
+                textarea.focus();
+                textarea.selectionStart = textarea.selectionEnd = startPos + textToInsert.length;
+                textarea.scrollTop = scrollTop;
+            }
+
+            toggleModeButton.addEventListener('click', () => {
+                if (currentMode === 'onscreen') {
+                    currentMode = 'pinyin';
+                    toggleModeButton.textContent = '切换到屏幕键盘';
+                    statusMessage.textContent = '模式：拼音输入 (带声调)';
+                    onScreenKeyboardArea.classList.add('hidden');
+                    phoneticInstructions.classList.remove('hidden');
+                    mainTextarea.readOnly = false;
+                    mainTextarea.classList.add('pinyin-mode');
+                    mainTextarea.placeholder = "输入拼音 (如: ni3 hao3)...";
+                    mainTextarea.addEventListener('input', handlePinyinInput);
+                } else { // currentMode === 'pinyin'
+                    currentMode = 'onscreen';
+                    toggleModeButton.textContent = '切换到拼音输入';
+                    statusMessage.textContent = '模式：屏幕键盘 (汉字)';
+                    onScreenKeyboardArea.classList.remove('hidden');
+                    phoneticInstructions.classList.add('hidden');
+                    mainTextarea.readOnly = true; // For on-screen character keyboard
+                    mainTextarea.classList.remove('pinyin-mode');
+                    mainTextarea.placeholder = "请在此处输入汉字...";
+                    mainTextarea.removeEventListener('input', handlePinyinInput);
+                }
+                mainTextarea.focus();
+            });
+
+            function handlePinyinInput() {
+                if (currentMode === 'pinyin') {
+                    const currentRawInput = mainTextarea.value;
+                    const originalCursorStart = mainTextarea.selectionStart;
+
+                    const pinyinText = convertPinyinWithTones(currentRawInput);
+
+                    // Calculate new cursor position (this can be tricky with multi-char to single-char conversion)
+                    // For simplicity, just place cursor at the end of the converted part
+                    // This might not be perfect for mid-text edits.
+                    const rawInputBeforeCursor = currentRawInput.substring(0, originalCursorStart);
+                    const convertedPrefix = convertPinyinWithTones(rawInputBeforeCursor);
+                    let newCursorPos = convertedPrefix.length;
+
+
+                    mainTextarea.removeEventListener('input', handlePinyinInput);
+                    mainTextarea.value = pinyinText;
+                    mainTextarea.addEventListener('input', handlePinyinInput);
+
+                    try {
+                        mainTextarea.selectionStart = mainTextarea.selectionEnd = newCursorPos;
+                    } catch (e) {
+                        mainTextarea.selectionStart = mainTextarea.selectionEnd = pinyinText.length;
+                    }
+                }
+            }
+
+            copyButton.addEventListener('click', () => {
+                if (!mainTextarea.value) return;
+                navigator.clipboard.writeText(mainTextarea.value)
+                    .then(() => {
+                        const originalText = copyButton.textContent;
+                        copyButton.textContent = '已复制!';
+                        copyButton.disabled = true;
+                        setTimeout(() => {
+                            copyButton.textContent = originalText;
+                            copyButton.disabled = false;
+                        }, 1500);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                        mainTextarea.select();
+                        try {
+                            document.execCommand('copy');
+                            const originalText = copyButton.textContent;
+                            copyButton.textContent = '已复制 (备用)!';
+                            copyButton.disabled = true;
+                            setTimeout(() => {
+                                copyButton.textContent = originalText;
+                                copyButton.disabled = false;
+                            }, 2000);
+                        } catch (e) {
+                             alert('复制失败，请手动复制。');
+                        }
+                        window.getSelection().removeAllRanges();
+                    });
+                mainTextarea.focus();
+            });
+
+            function initializeApp() {
+                createOnScreenKeyboard();
+                if (currentMode === 'onscreen') {
+                    mainTextarea.readOnly = true;
+                    mainTextarea.placeholder = "请在此处输入汉字...";
+                    mainTextarea.classList.remove('pinyin-mode');
+                    onScreenKeyboardArea.classList.remove('hidden');
+                    phoneticInstructions.classList.add('hidden');
+                    statusMessage.textContent = '模式：屏幕键盘 (汉字)';
+                    toggleModeButton.textContent = '切换到拼音输入';
+                } else { // pinyin mode
+                    mainTextarea.readOnly = false;
+                    mainTextarea.placeholder = "输入拼音 (如: ni3 hao3)...";
+                    mainTextarea.classList.add('pinyin-mode');
+                    onScreenKeyboardArea.classList.add('hidden');
+                    phoneticInstructions.classList.remove('hidden');
+                    statusMessage.textContent = '模式：拼音输入 (带声调)';
+                    toggleModeButton.textContent = '切换到屏幕键盘';
+                    mainTextarea.addEventListener('input', handlePinyinInput);
+                }
+                mainTextarea.focus();
+            }
+            initializeApp();
+        });
+    </script>
+</body>
+</html>

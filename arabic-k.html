@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أداة كتابة عربية حديثة</title>
+    <style>
+        :root {
+            --bg-color: #261C15;
+            --surface-color: #3E2C21;
+            --text-color: #F5EFE6;
+            --primary-color: #FF8C00;
+            --primary-hover-color: #E67E00;
+            --secondary-color: #5A3E30;
+            --secondary-hover-color: #6B4A3A;
+            --border-color: #503C30;
+            --font-arabic: 'Noto Sans Arabic', 'Tahoma', 'Arial', sans-serif;
+            --font-latin: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-arabic);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+            direction: rtl;
+        }
+
+        .app-header {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 0 5px;
+        }
+
+        .app-header h1 {
+            font-size: 1.5em;
+            color: var(--primary-color);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .back-button {
+            padding: 7px 12px;
+            font-size: 0.9em;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        .back-button:hover {
+            background-color: var(--secondary-hover-color);
+        }
+
+        .container {
+            background-color: var(--surface-color);
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+            width: 100%;
+            max-width: 800px;
+            overflow-x: hidden;
+        }
+
+        .main-textarea {
+            width: 100%;
+            min-height: 140px;
+            font-size: 1.6em;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin-bottom: 12px;
+            resize: vertical;
+            text-align: right;
+            direction: rtl;
+        }
+        .main-textarea::placeholder {
+            color: #998273;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .controls button {
+            padding: 8px 12px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: #111;
+            transition: background-color 0.2s, transform 0.1s;
+            font-weight: 600;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+        }
+        .controls button:hover {
+            background-color: var(--primary-hover-color);
+        }
+        .controls button:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .controls button.secondary {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+        .controls button.secondary:hover {
+            background-color: var(--secondary-hover-color);
+        }
+
+        .status-message {
+            text-align: center;
+            margin-bottom: 12px;
+            font-style: italic;
+            color: #BEA697;
+            font-size: 0.9em;
+        }
+
+        .instructions.hidden {
+             display: none !important;
+        }
+        .instructions {
+            background-color: rgba(0,0,0,0.1);
+            padding: 8px;
+            border-radius: 5px;
+            margin-top: 8px;
+            font-size: 0.85em;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+        .instructions p {
+            text-align: right;
+        }
+        .instructions code {
+            background-color: rgba(255,255,255,0.1);
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-family: var(--font-latin);
+            direction: ltr;
+            display: inline-block;
+            color: #c0c0c0;
+        }
+
+        .keyboard-area {
+            border: 1px solid var(--border-color);
+            padding: 8px 4px;
+            border-radius: 6px;
+            background-color: var(--bg-color);
+            overflow-x: auto;
+        }
+
+        .keyboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            justify-content: center;
+        }
+
+        .keyboard-row {
+            display: flex;
+            width: 100%;
+            margin-bottom: 2px;
+            gap: 2px;
+            flex-direction: row-reverse;
+        }
+
+        .keyboard button {
+            font-family: var(--font-arabic);
+            font-size: clamp(0.9em, 2.2vw, 1.2em);
+            padding: 4px 0;
+            flex-grow: 1;
+            flex-shrink: 1;
+            flex-basis: 0;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            background-color: var(--surface-color);
+            color: var(--text-color);
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+            min-width: 26px; /* Increased min-width for slightly wider buttons */
+            height: 40px; /* Increased height slightly */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            box-sizing: border-box;
+        }
+        .keyboard button:hover {
+            background-color: var(--secondary-hover-color);
+            border-color: var(--primary-color);
+        }
+        .keyboard button:active {
+            background-color: var(--primary-color);
+            color: #111;
+            transform: translateY(1px);
+        }
+
+        .keyboard button.special {
+            background-color: var(--secondary-color);
+            font-size: clamp(0.8em, 1.7vw, 1em);
+            flex-grow: 1.2;
+        }
+        .keyboard button.special[data-latin="true"] {
+            font-family: var(--font-latin);
+        }
+        .keyboard button.spacebar {
+            flex-grow: 3.5;
+        }
+        .keyboard button.diacritic {
+            min-width: 24px; /* Adjusted */
+            font-size: clamp(0.85em, 2.1vw, 1.05em); /* Adjusted */
+            padding: 3px 0;
+        }
+        .keyboard button.symbol-key {
+            min-width: 24px; /* Adjusted */
+            font-size: clamp(0.8em, 1.9vw, 0.95em); /* Adjusted */
+            padding: 3px 0;
+        }
+
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 480px) {
+            .keyboard button {
+                min-width: 22px;
+                height: 38px;
+                font-size: clamp(0.85em, 2.1vw, 1.05em);
+            }
+             .keyboard button.special {
+                font-size: clamp(0.75em, 1.6vw, 0.9em);
+            }
+            .app-header h1 { font-size: 1.3em; }
+            .main-textarea { font-size: 1.4em; }
+        }
+         @media (max-width: 360px) {
+            .keyboard button {
+                min-width: 20px;
+                height: 36px;
+                font-size: clamp(0.75em, 1.9vw, 0.95em);
+            }
+            .controls button {
+                 font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <h1>أداة كتابة عربية</h1>
+        <a href="index.html" class="back-button">رجوع</a>
+    </header>
+
+    <div class="container">
+        <textarea id="mainTextarea" class="main-textarea" placeholder="اكتب هنا..."></textarea>
+
+        <div class="controls">
+            <button id="toggleModeButton">الوضع الصوتي</button>
+            <button id="copyButton" class="secondary">نسخ</button>
+        </div>
+
+        <div id="statusMessage" class="status-message">الوضع: لوحة مفاتيح الشاشة</div>
+
+        <div id="phoneticInstructions" class="instructions hidden">
+            <p>الوضع الصوتي مفعل. (مثال: <code>k</code> &larr; ك، <code>a</code> &larr; ا، <code>aa</code> &larr; آ)</p>
+        </div>
+
+        <div id="onScreenKeyboardArea" class="keyboard-area">
+            <div id="arabicKeyboard" class="keyboard">
+                <!-- Arabic Keyboard buttons will be generated here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mainTextarea = document.getElementById('mainTextarea');
+            const toggleModeButton = document.getElementById('toggleModeButton');
+            const copyButton = document.getElementById('copyButton');
+            const onScreenKeyboardArea = document.getElementById('onScreenKeyboardArea');
+            const phoneticInstructions = document.getElementById('phoneticInstructions');
+            const keyboardContainer = document.getElementById('arabicKeyboard');
+            const statusMessage = document.getElementById('statusMessage');
+
+            let currentMode = 'onscreen';
+
+            // --- Arabic Phonetic Conversion Logic ---
+            const phoneticMap = {
+                // Vowels & Alifs
+                'aa': 'آ', 'A': 'آ', // Alif Madda
+                'a': 'ا',           // Alif
+                'i': 'ي', 'ee': 'ي', 'E': 'ي', // Ya for i/e sounds or Kasra context
+                'u': 'و', 'oo': 'و', 'O': 'و', // Waw for u/o sounds or Damma context
+
+                // Hamzas (simplified, more complex forms might need dedicated keys or sequences)
+                '\'': 'ء', // Standalone Hamza
+                '>': 'أ', // Alif with Hamza Above (common for initial 'a' with hamza)
+                '<': 'إ', // Alif with Hamza Below (common for initial 'i' with hamza)
+                '&': 'ؤ', // Waw with Hamza
+                'Y': 'ئ', // Ya with Hamza (uppercase Y to distinguish from 'y' for ي)
+
+                // Consonants
+                'b': 'ب',
+                't': 'ت',
+                'th': 'ث',
+                'j': 'ج',
+                'H': 'ح', // Haa (to distinguish from 'h' for ه)
+                'kh': 'خ',
+                'd': 'د',
+                'dh': 'ذ', // Dhal
+                'r': 'ر',
+                'z': 'ز',
+                's': 'س',
+                'sh': 'ش',
+                'S': 'ص', // Saad
+                'D': 'ض', // Daad
+                'T': 'ط', // Taa
+                'Z': 'ظ', // Zhaa (uppercase Z to distinguish from 'z' for ز)
+                'g': 'غ', 'gh': 'غ', // Ghain (using 'g' as it's often used in transliteration)
+                'e': 'ع', // Ain (using 'e' as a common transliteration for Ain)
+                'f': 'ف',
+                'q': 'ق',
+                'k': 'ك',
+                'l': 'ل',
+                'm': 'م',
+                'n': 'ن',
+                'h': 'ه', // Ha
+                'w': 'و', // Waw as consonant
+                'y': 'ي', // Ya as consonant
+                'p': 'پ', // Peh (not standard Arabic, but sometimes used)
+                'v': 'ڤ', // Ve (not standard Arabic)
+                'ch': 'چ',// Che (not standard Arabic)
+                'G': 'ج', // Alternative for Jeem
+
+                // Taa Marbuta
+                'ah': 'ة', // Common for 'ah' ending
+                'at': 'ة',
+
+                // Diacritics (can be typed or use on-screen keyboard)
+                'fatha': 'َ',   // a (short vowel)
+                'kasra': 'ِ',   // i (short vowel)
+                'damma': 'ُ',   // u (short vowel)
+                'sukun': 'ْ',   // X (no vowel)
+                'shadda': 'ّ',  // # (doubling)
+                'tanween_fath': 'ً',
+                'tanween_kasr': 'ٍ',
+                'tanween_damm': 'ٌ',
+
+
+                // Punctuation
+                ',': '،',
+                ';': '؛',
+                '?': '؟',
+                '.': '۔', // Using Urdu full stop, as Arabic often uses Latin full stop. Or use '.'
+                '!': '!', '$': '$', '%': '%', '^': '^', '&': '&', '*': '*', '(': '(', ')': ')', '-': '-', '_': '_', '=': '=', '+': '+'
+            };
+
+
+            function convertPhoneticToArabic(inputText) {
+                let output = "";
+                let i = 0;
+                const len = inputText.length;
+                const phoneticKeys = Object.keys(phoneticMap).sort((a, b) => b.length - a.length);
+
+                while (i < len) {
+                    let matched = false;
+                    for (const key of phoneticKeys) {
+                        if (inputText.substring(i).startsWith(key)) {
+                            let charToAdd = phoneticMap[key];
+
+                            // Special handling for Alif vs Alif Madda
+                            if (key === 'a' && (i === 0 || /\s|[،؛؟۔!\.\(\)]/.test(output[output.length - 1] || ' '))) {
+                                charToAdd = 'ا';
+                            } else if ((key === 'aa' || key === 'A') && (i === 0 || /\s|[،؛؟۔!\.\(\)]/.test(output[output.length - 1] || ' '))) {
+                                charToAdd = 'آ';
+                            } else if (key === 'aa' || key === 'A') { // In middle of word, Alif Madda becomes Alif
+                                charToAdd = 'ا';
+                            }
+
+                            // Prevent double sukoon
+                            if (charToAdd === 'ْ' && output.endsWith('ْ')) {
+                                // Do nothing
+                            } else {
+                                output += charToAdd;
+                            }
+                            i += key.length;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        if (/[0-9]/.test(inputText[i])) {
+                           output += inputText[i]; // Pass Latin numbers, can be converted later if needed
+                        } else {
+                           output += inputText[i]; // Pass unmatched characters
+                        }
+                        i++;
+                    }
+                }
+                return output;
+            }
+
+            // --- On-Screen Arabic Keyboard Logic ---
+            // Standard Arabic PC Keyboard Layout (approximate)
+            const arabicKeyboardLayout = [
+                ['ذ', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹', '۰', '-', '=', 'Backspace'],
+                ['ض', 'ص', 'ث', 'ق', 'ف', 'غ', 'ع', 'ه', 'خ', 'ح', 'ج', 'د', '\\'],
+                ['ش', 'س', 'ي', 'ب', 'ل', 'ا', 'ت', 'ن', 'م', 'ك', 'ط', 'Enter'], // Enter for Space
+                ['ئ', 'ء', 'ؤ', 'ر', 'لا', 'ى', 'ة', 'و', 'ز', 'ظ', '؟'],
+                ['Space', '،', '.'] // Using Latin period for broader compatibility
+            ];
+
+            const arabicDiacriticsTopRow = ['َ', 'ً', 'ُ', 'ٌ', 'ِ', 'ٍ', 'ْ', 'ّ']; // Fatha, Tanween Fath, Damma, Tanween Damm, Kasra, Tanween Kasr, Sukun, Shadda
+
+
+            function createOnScreenKeyboard() {
+                keyboardContainer.innerHTML = '';
+
+                // Add Diacritics row first
+                const diaRowDiv = document.createElement('div');
+                diaRowDiv.classList.add('keyboard-row');
+                arabicDiacriticsTopRow.forEach(key => {
+                     const button = document.createElement('button');
+                     button.textContent = key;
+                     button.classList.add('special', 'diacritic');
+                     button.addEventListener('click', () => handleOnScreenKey(key));
+                     diaRowDiv.appendChild(button);
+                });
+                keyboardContainer.appendChild(diaRowDiv);
+
+
+                arabicKeyboardLayout.forEach(rowKeys => {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.classList.add('keyboard-row');
+                    rowKeys.forEach(key => {
+                        const button = document.createElement('button');
+                        button.textContent = key;
+                        if (['Backspace', 'Space', 'Enter'].includes(key)) {
+                            button.classList.add('special');
+                            button.setAttribute('data-latin', 'true');
+                            if (key === 'Space') button.classList.add('spacebar');
+                            if (key === 'Enter') button.textContent = 'مسافة'; // Arabic for Space
+                        } else if (key === 'لا') { // Special handling for Lam-Alif
+                            // button is fine as is
+                        } else if (key === 'ى') { // Alif Maqsura
+                            // button is fine as is
+                        } else if (['۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹', '۰', '-', '=', '\\'].includes(key)){
+                             button.classList.add('special', 'symbol-key'); // Treat numerals/symbols as special
+                             button.setAttribute('data-latin', 'false'); // They are Arabic numerals
+                        }
+
+
+                        button.addEventListener('click', () => {
+                            if (key === 'Enter') handleOnScreenKey(' ');
+                            else handleOnScreenKey(key);
+                        });
+                        rowDiv.appendChild(button);
+                    });
+                    keyboardContainer.appendChild(rowDiv);
+                });
+            }
+
+            function handleOnScreenKey(key) {
+                const cursorPos = mainTextarea.selectionStart;
+                const text = mainTextarea.value;
+                switch (key) {
+                    case 'Backspace':
+                        if (cursorPos > 0 || mainTextarea.selectionEnd > mainTextarea.selectionStart) {
+                             const before = text.substring(0, mainTextarea.selectionStart - (mainTextarea.selectionEnd === mainTextarea.selectionStart ? 1:0) );
+                             const after = text.substring(mainTextarea.selectionEnd);
+                             mainTextarea.value = before + after;
+                             mainTextarea.selectionStart = mainTextarea.selectionEnd = before.length;
+                        }
+                        break;
+                    case 'Clear':
+                        mainTextarea.value = '';
+                        break;
+                    case 'Space':
+                        insertAtCursor(mainTextarea, ' ');
+                        break;
+                    default:
+                        insertAtCursor(mainTextarea, key);
+                        break;
+                }
+                mainTextarea.focus();
+            }
+
+            function insertAtCursor(textarea, textToInsert) {
+                const startPos = textarea.selectionStart;
+                const endPos = textarea.selectionEnd;
+                const scrollTop = textarea.scrollTop;
+                textarea.value = textarea.value.substring(0, startPos) +
+                                 textToInsert +
+                                 textarea.value.substring(endPos, textarea.value.length);
+                textarea.focus();
+                textarea.selectionStart = textarea.selectionEnd = startPos + textToInsert.length;
+                textarea.scrollTop = scrollTop;
+            }
+
+            toggleModeButton.addEventListener('click', () => {
+                if (currentMode === 'onscreen') {
+                    currentMode = 'phonetic';
+                    toggleModeButton.textContent = 'لوحة مفاتيح الشاشة';
+                    statusMessage.textContent = 'الوضع: الكتابة الصوتية';
+                    onScreenKeyboardArea.classList.add('hidden');
+                    phoneticInstructions.classList.remove('hidden');
+                    mainTextarea.readOnly = false;
+                    mainTextarea.placeholder = "اكتب صوتيًا (مثال: salam)";
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                } else {
+                    currentMode = 'onscreen';
+                    toggleModeButton.textContent = 'الوضع الصوتي';
+                    statusMessage.textContent = 'الوضع: لوحة مفاتيح الشاشة';
+                    onScreenKeyboardArea.classList.remove('hidden');
+                    phoneticInstructions.classList.add('hidden');
+                    mainTextarea.readOnly = true;
+                    mainTextarea.placeholder = "استخدم لوحة مفاتيح الشاشة";
+                    mainTextarea.removeEventListener('input', handlePhoneticInput);
+                }
+                mainTextarea.focus();
+            });
+
+             function handlePhoneticInput() {
+                if (currentMode === 'phonetic') {
+                    const currentRawInput = mainTextarea.value;
+                    const originalCursorStart = mainTextarea.selectionStart;
+                    const arabicText = convertPhoneticToArabic(currentRawInput);
+                    const rawInputBeforeCursor = currentRawInput.substring(0, originalCursorStart);
+                    const convertedPrefix = convertPhoneticToArabic(rawInputBeforeCursor);
+                    let newCursorPos = convertedPrefix.length;
+
+                    mainTextarea.removeEventListener('input', handlePhoneticInput);
+                    mainTextarea.value = arabicText;
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+
+                    try {
+                        mainTextarea.selectionStart = mainTextarea.selectionEnd = newCursorPos;
+                    } catch (e) {
+                        mainTextarea.selectionStart = mainTextarea.selectionEnd = arabicText.length;
+                    }
+                }
+            }
+
+            copyButton.addEventListener('click', () => {
+                if (!mainTextarea.value) return;
+                navigator.clipboard.writeText(mainTextarea.value)
+                    .then(() => {
+                        const originalText = copyButton.textContent;
+                        copyButton.textContent = 'تم النسخ!';
+                        copyButton.disabled = true;
+                        setTimeout(() => {
+                            copyButton.textContent = originalText;
+                            copyButton.disabled = false;
+                        }, 1500);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                        mainTextarea.select();
+                        try {
+                            document.execCommand('copy');
+                            const originalText = copyButton.textContent;
+                            copyButton.textContent = 'تم النسخ (احتياطي)!';
+                            copyButton.disabled = true;
+                            setTimeout(() => {
+                                copyButton.textContent = originalText;
+                                copyButton.disabled = false;
+                            }, 2000);
+                        } catch (e) {
+                             alert('فشل النسخ. يرجى النسخ يدويًا.');
+                        }
+                        window.getSelection().removeAllRanges();
+                    });
+                mainTextarea.focus();
+            });
+
+            const clearButton = document.createElement('button');
+            clearButton.textContent = 'مسح';
+            clearButton.classList.add('secondary');
+            clearButton.id = 'clearButton';
+            clearButton.addEventListener('click', () => {
+                mainTextarea.value = '';
+                mainTextarea.focus();
+            });
+            copyButton.parentNode.insertBefore(clearButton, copyButton.nextSibling);
+
+
+            function initializeApp() {
+                createOnScreenKeyboard();
+                if (currentMode === 'onscreen') {
+                    mainTextarea.readOnly = true;
+                    mainTextarea.placeholder = "استخدم لوحة مفاتيح الشاشة";
+                    onScreenKeyboardArea.classList.remove('hidden');
+                    phoneticInstructions.classList.add('hidden');
+                    statusMessage.textContent = 'الوضع: لوحة مفاتيح الشاشة';
+                    toggleModeButton.textContent = 'الوضع الصوتي';
+                } else {
+                    mainTextarea.readOnly = false;
+                    mainTextarea.placeholder = "اكتب صوتيًا (مثال: salam)";
+                    onScreenKeyboardArea.classList.add('hidden');
+                    phoneticInstructions.classList.remove('hidden');
+                    statusMessage.textContent = 'الوضع: الكتابة الصوتية';
+                    toggleModeButton.textContent = 'لوحة مفاتيح الشاشة';
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                }
+                mainTextarea.focus();
+            }
+            initializeApp();
+        });
+    </script>
+</body>
+</html>

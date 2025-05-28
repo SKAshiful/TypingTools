@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="kn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Kannada Typing Tool</title>
+    <style>
+        :root {
+            --bg-color: #261C15; /* Dark Brown */
+            --surface-color: #3E2C21; /* Medium Brown */
+            --text-color: #F5EFE6; /* Off-white / Cream */
+            --primary-color: #FF8C00; /* Dark Orange */
+            --primary-hover-color: #E67E00; /* Darker Orange for hover */
+            --secondary-color: #5A3E30; /* Muted Brown */
+            --secondary-hover-color: #6B4A3A; /* Lighter Muted Brown */
+            --border-color: #503C30; /* Brownish Border */
+            --font-kannada: 'Noto Sans Kannada', 'Tunga', 'Kedage', Arial, sans-serif; /* Kannada Fonts */
+            --font-latin: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-latin);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .app-header {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 0 5px;
+        }
+
+        .app-header h1 {
+            font-size: 1.3em;
+            color: var(--primary-color);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            font-family: var(--font-kannada);
+        }
+
+        .back-button {
+            padding: 7px 12px;
+            font-size: 0.85em;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            font-family: var(--font-kannada);
+        }
+        .back-button:hover {
+            background-color: var(--secondary-hover-color);
+        }
+
+        .container {
+            background-color: var(--surface-color);
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .main-textarea {
+            width: 100%;
+            min-height: 120px;
+            font-size: 1.5em;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin-bottom: 12px;
+            font-family: var(--font-kannada); /* Kannada font for textarea */
+            resize: vertical;
+        }
+        .main-textarea::placeholder {
+            color: #998273;
+            font-family: var(--font-kannada);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .controls button {
+            padding: 8px 12px;
+            font-size: 0.9em;
+            font-family: var(--font-kannada); /* Kannada for button text */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: #111;
+            transition: background-color 0.2s, transform 0.1s;
+            font-weight: 600;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+        }
+        .controls button:hover {
+            background-color: var(--primary-hover-color);
+        }
+        .controls button:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .controls button.secondary {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+        .controls button.secondary:hover {
+            background-color: var(--secondary-hover-color);
+        }
+
+        .status-message {
+            text-align: center;
+            margin-bottom: 12px;
+            font-style: italic;
+            color: #BEA697;
+            font-size: 0.85em;
+            font-family: var(--font-kannada);
+        }
+
+        .instructions.hidden {
+             display: none !important;
+        }
+        .instructions {
+            background-color: rgba(0,0,0,0.1);
+            padding: 8px;
+            border-radius: 5px;
+            margin-top: 8px;
+            font-size: 0.75em;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            font-family: var(--font-kannada);
+        }
+        .instructions code {
+            background-color: rgba(255,255,255,0.1);
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+            color: #c0c0c0;
+        }
+
+
+        .keyboard-area {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            border-radius: 6px;
+            background-color: var(--bg-color);
+        }
+
+        .keyboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            justify-content: center;
+        }
+
+        .keyboard-row {
+            display: flex;
+            width: 100%;
+            margin-bottom: 3px;
+            gap: 3px;
+        }
+
+        .keyboard button {
+            font-family: var(--font-kannada); /* Kannada font for keys */
+            font-size: clamp(0.8em, 2.5vw, 1.1em);
+            padding: 6px 0;
+            flex-grow: 1;
+            flex-basis: 0;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            background-color: var(--surface-color);
+            color: var(--text-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+            min-width: 26px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        .keyboard button:hover {
+            background-color: var(--secondary-hover-color);
+            border-color: var(--primary-color);
+        }
+        .keyboard button:active {
+            background-color: var(--primary-color);
+            color: #111;
+            transform: translateY(1px);
+        }
+
+        .keyboard button.special {
+            background-color: var(--secondary-color);
+            font-family: var(--font-latin);
+            font-size: clamp(0.65em, 1.8vw, 0.85em);
+            flex-grow: 1.3;
+        }
+        .keyboard button.spacebar {
+            flex-grow: 4;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 400px) {
+            .keyboard button {
+                min-width: 22px;
+                height: 36px;
+                font-size: clamp(0.7em, 2.2vw, 1em);
+            }
+             .keyboard button.special {
+                font-size: clamp(0.6em, 1.6vw, 0.8em);
+            }
+            .app-header h1 { font-size: 1em; }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <h1>ಕನ್ನಡ ಟೈಪಿಂಗ್ ಉಪಕರಣ</h1>
+        <a href="index.html" class="back-button">ಹಿಂದೆ</a>
+    </header>
+
+    <div class="container">
+        <textarea id="mainTextarea" class="main-textarea" placeholder="ಇಲ್ಲಿ ಟೈಪ್ ಮಾಡಿ..."></textarea>
+
+        <div class="controls">
+            <button id="toggleModeButton">ಧ್ವन्याತ್ಮಕ ಮೋಡ್‌ಗೆ ಬದಲಿಸಿ</button>
+            <button id="copyButton" class="secondary">ನಕಲಿಸಿ</button>
+        </div>
+
+        <div id="statusMessage" class="status-message">ಮೋಡ್: ಆನ್-ಸ್ಕ್ರೀನ್ ಕೀಬೋರ್ಡ್</div>
+
+        <div id="phoneticInstructions" class="instructions hidden">
+            <p>ಧ್ವन्याತ್ಮಕ ಮೋಡ್ ಸಕ್ರಿಯವಾಗಿದೆ. (ಉದಾ: <code>k</code> -> ಕ, <code>X</code> -> ್)</p>
+        </div>
+
+        <div id="onScreenKeyboardArea" class="keyboard-area">
+            <div id="kannadaKeyboard" class="keyboard">
+                <!-- Kannada Keyboard buttons will be generated here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mainTextarea = document.getElementById('mainTextarea');
+            const toggleModeButton = document.getElementById('toggleModeButton');
+            const copyButton = document.getElementById('copyButton');
+            const onScreenKeyboardArea = document.getElementById('onScreenKeyboardArea');
+            const phoneticInstructions = document.getElementById('phoneticInstructions');
+            const keyboardContainer = document.getElementById('kannadaKeyboard');
+            const statusMessage = document.getElementById('statusMessage');
+
+            let currentMode = 'onscreen';
+            let previousPhoneticInput = "";
+
+            // --- Kannada Phonetic Conversion Logic ---
+            const phoneticMap = {
+                // Vowels (Swaragalu) - Standalone and Matras (Kagunita) - Prioritize longer matches
+                'au': { default: 'ಔ', matra: 'ೌ' }, 'AU': { default: 'ಔ', matra: 'ೌ' },
+                'ai': { default: 'ಐ', matra: 'ೈ' }, 'AI': { default: 'ಐ', matra: 'ೈ' },
+                'oo': { default: 'ಓ', matra: 'ೋ' }, 'OO': { default: 'ಓ', matra: 'ೋ' }, // Long O
+                'o':  { default: 'ಒ', matra: 'ೊ' }, 'O':  { default: 'ಒ', matra: 'ೊ' }, // Short o
+                'ee': { default: 'ಏ', matra: 'ೇ' }, 'EE': { default: 'ಏ', matra: 'ೇ' }, // Long E
+                'e':  { default: 'ಎ', matra: 'ೆ' }, 'E':  { default: 'ಎ', matra: 'ೆ' }, // Short e
+                'uu': { default: 'ಊ', matra: 'ೂ' }, 'UU': { default: 'ಊ', matra: 'ೂ' }, // Long U
+                'u':  { default: 'ಉ', matra: 'ು' }, // Short u
+                'ii': { default: 'ಈ', matra: 'ೀ' }, 'II': { default: 'ಈ', matra: 'ೀ' }, 'I': { default: 'ಈ', matra: 'ೀ' }, // Long I
+                'i':  { default: 'ಇ', matra: 'ಿ' }, // Short i
+                'aa': { default: 'ಆ', matra: 'ಾ' }, 'AA': { default: 'ಆ', matra: 'ಾ' }, 'A': { default: 'ಆ', matra: 'ಾ' },
+                'a':  { default: 'ಅ', matra: '' },  // Inherent 'a'
+                'Ru': { default: 'ಋ', matra: 'ೃ' }, 'R^u': { default: 'ಋ', matra: 'ೃ' },
+                'RU': { default: 'ೠ', matra: 'ೄ' }, 'R^U': { default: 'ೠ', matra: 'ೄ' }, // Less common
+
+                // Consonants (Vyanjanagalu) - Prioritize longer matches
+                'kh': 'ಖ', 'Kh': 'ಖ',
+                'gh': 'ಘ', 'Gh': 'ಘ',
+                'Ch': 'ಛ', 'chh': 'ಛ', // Aspirated Ch
+                'jh': 'ಝ', 'Jh': 'ಝ',
+                'Th': 'ಠ', // Aspirated Retroflex T
+                'Dh': 'ಢ', // Aspirated Retroflex D
+                'th': 'ಥ', // Aspirated Dental t
+                'dh': 'ಧ', // Aspirated Dental d
+                'ph': 'ಫ', 'Ph': 'ಫ', 'f': 'ಫ', 'F': 'ಫ',
+                'bh': 'ಭ', 'Bh': 'భ',
+                'k': 'ಕ', 'K': 'ಕ', 'q': 'ಕ', 'Q': 'ಕ',
+                'g': 'ಗ', 'G': 'ಗ',
+                'ng': 'ಙ', 'Nga': 'ಙ', // (ṅ - ಙ U+0C99)
+                'ch': 'ಚ', 'C': 'ಚ',     // Unaspirated Ch/C
+                'j': 'ಜ', 'J': 'ಜ', 'z': 'ಜ', 'Z': 'ಜ',
+                'Ny': 'ಞ', 'jna':'ಞ', 'Nya':'ಞ', // (ñ - ಞ U+0C9E)
+                'T': 'ಟ', // Retroflex T (unaspirated)
+                'D': 'ಡ', // Retroflex D (unaspirated)
+                'N': 'ಣ', // Retroflex N (ṇa - ಣ U+0CA3)
+                't': 'ತ', // Dental t (unaspirated)
+                'd': 'ದ', // Dental d (unaspirated)
+                'n': 'ನ', // Dental n (ನ U+0CA8)
+                'p': 'ಪ', 'P': 'ಪ',
+                'b': 'ಬ', 'B': 'ಬ',
+                'm': 'ಮ', 'M': 'ಮ',
+                'y': 'ಯ', 'Y': 'ಯ',
+                'r': 'ರ', 'R': 'ರ', // Standard r
+                'L': 'ಳ', // Kannada 'La' (Retroflex L - ಳ U+0CB3)
+                'l': 'ಲ', // Dental l (ಲ U+0CB2)
+                'v': 'ವ', 'V': 'ವ', 'w': 'ವ', 'W': 'ವ',
+                'sh': 'ಶ', 'Sh': 'ಶ',    // Palatal Sibilant (ಶ U+0CB6)
+                'Shh': 'ಷ', 'Sha': 'ಷ',  // Retroflex Sibilant (ṣa - ಷ U+0CB7)
+                's': 'ಸ',
+                'h': 'ಹ', 'H':'ಹ', // Using 'X' for Halant to avoid conflict
+
+                // Halant (Virama -  ್ )
+                'X': '್', 'virama': '್', 'halant': '್',
+
+                // Anusvara, Visarga
+                'M': 'ಂ', 'anusvara': 'ಂ', // Anusvara ( ಂ U+0C82)
+                'H:': 'ಃ', ':': 'ಃ', 'visarga': 'ಃ', // Visarga ( ಃ U+0C83)
+                // Kannada does not use Chandrabindu as much as Devanagari scripts.
+
+                // Common Conjuncts
+                'ksh': 'ಕ್ಷ', 'kSh': 'ಕ್ಷ', // ( ಕ + ್ + ಷ )
+                'jny': 'ಜ್ಞ', 'gny': 'ಜ್ಞ', // ( ಜ + ್ + ಞ )
+                'shr': 'ಶ್ರೀ', 'Shree': 'ಶ್ರೀ', // ( ಶ + ್ + ರ + ೀ ) - often treated as a unit
+
+                // Punctuation
+                '..': '.', // English Period
+                // Kannada often uses space or just new line, not a specific danda always.
+                '$': '₹', // Rupee sign
+                '?': '?', '!': '!' // Pass through
+            };
+
+            const kannadaConsonants = "ಕಖಗಘಙಚಛಜಝಞಟಠಡಢಣತಥದಧನಪಫಬಭಮಯರಲವಶಷಸಹಳಕ್ಷಜ್ಞ";
+            const isKannadaConsonant = char => kannadaConsonants.includes(char);
+
+            function convertPhoneticToKannada(inputText) {
+                let output = "";
+                let i = 0;
+                const len = inputText.length;
+                const phoneticKeys = Object.keys(phoneticMap).sort((a, b) => b.length - a.length);
+
+                while (i < len) {
+                    let matched = false;
+                    for (const key of phoneticKeys) {
+                        if (inputText.substring(i).startsWith(key)) {
+                            const rule = phoneticMap[key];
+                            let charToAdd = "";
+
+                            if (typeof rule === 'string') {
+                                if (rule === '್' && output.length > 0 && isKannadaConsonant(output[output.length - 1])) {
+                                    charToAdd = rule;
+                                } else if (isKannadaConsonant(rule)) {
+                                    charToAdd = rule;
+                                } else {
+                                     charToAdd = rule;
+                                }
+                            } else { // Vowel object
+                                const lastCharOutput = output.length > 0 ? output[output.length - 1] : null;
+                                if (lastCharOutput && isKannadaConsonant(lastCharOutput) && rule.matra !== undefined) {
+                                    if (key === 'a' && rule.matra === '') {
+                                        if (output.endsWith('್')) {
+                                            output = output.substring(0, output.length -1);
+                                        }
+                                        charToAdd = '';
+                                    } else {
+                                        if (output.endsWith('್')) {
+                                           output = output.substring(0, output.length -1);
+                                        }
+                                        charToAdd = rule.matra;
+                                    }
+                                } else {
+                                    charToAdd = rule.default;
+                                }
+                            }
+                            output += charToAdd;
+                            i += key.length;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        output += inputText[i];
+                        i++;
+                    }
+                }
+                return output;
+            }
+
+            // --- On-Screen Kannada Keyboard Logic ---
+            const kannadaKeyboardLayout = [
+                // Swaragalu (Vowels)
+                ['ಅ', 'ಆ', 'ಇ', 'ಈ', 'ಉ', 'ಊ', 'ಋ', 'ೠ'], // Added ೠ
+                ['ಎ', 'ಏ', 'ಐ', 'ಒ', 'ಓ', 'ಔ', 'ಂ', 'ಃ'],
+                // Vyanjanagalu (Consonants)
+                ['ಕ', 'ಖ', 'ಗ', 'ಘ', 'ಙ',  'ಚ', 'ಛ', 'ಜ', 'ಝ', 'ಞ'],
+                ['ಟ', 'ಠ', 'ಡ', 'ಢ', 'ಣ',  'ತ', 'ಥ', 'ದ', 'ಧ', 'ನ'],
+                ['ಪ', 'ಫ', 'ಬ', 'ಭ', 'ಮ',  'ಯ', 'ರ', 'ಲ', 'ವ', 'ಶ'],
+                ['ಷ', 'ಸ', 'ಹ', 'ಳ',      'ಕ್ಷ', 'ಜ್ಞ', 'ಶ್ರೀ'], // Added ಶ್ರೀ
+                // Kagunitagalu (Matras) & Halant
+                ['ಾ', 'ಿ', 'ೀ', 'ು', 'ೂ', 'ೃ', 'ೄ'], // Added ೄ matra
+                ['ೆ', 'ೇ', 'ೈ', 'ೊ', 'ೋ', 'ೌ', '್'],
+                // Numerals
+                ['೦', '೧', '೨', '೩', '೪', '೫', '೬', '೭', '೮', '೯'],
+                // Punctuation & Controls
+                ['?', '!', ',', '.', '₹', 'Backspace', 'Space', 'Clear']
+            ];
+
+
+            function createOnScreenKeyboard() {
+                keyboardContainer.innerHTML = '';
+                kannadaKeyboardLayout.forEach(rowKeys => {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.classList.add('keyboard-row');
+                    rowKeys.forEach(key => {
+                        const button = document.createElement('button');
+                        button.textContent = key;
+                        if (['Backspace', 'Clear', 'Space'].includes(key)) {
+                            button.classList.add('special');
+                            if (key === 'Space') button.classList.add('spacebar');
+                        } else if (['?', '!', '₹', ',', '.'].includes(key) || (key >= '0' && key <= '9' && key.length === 1 && !kannadaKeyboardLayout.flat().includes(key))){
+                             button.classList.add('special');
+                             button.style.fontFamily = 'var(--font-latin)';
+                        }
+                        button.addEventListener('click', () => handleOnScreenKey(key));
+                        rowDiv.appendChild(button);
+                    });
+                    keyboardContainer.appendChild(rowDiv);
+                });
+            }
+
+            function handleOnScreenKey(key) {
+                const cursorPos = mainTextarea.selectionStart;
+                const text = mainTextarea.value;
+                switch (key) {
+                    case 'Backspace':
+                        if (cursorPos > 0) {
+                            mainTextarea.value = text.substring(0, cursorPos - 1) + text.substring(mainTextarea.selectionEnd);
+                            mainTextarea.selectionStart = mainTextarea.selectionEnd = cursorPos - 1;
+                        }
+                        break;
+                    case 'Clear':
+                        mainTextarea.value = '';
+                        break;
+                    case 'Space':
+                        insertAtCursor(mainTextarea, ' ');
+                        break;
+                    default:
+                        insertAtCursor(mainTextarea, key);
+                        break;
+                }
+                mainTextarea.focus();
+            }
+
+            function insertAtCursor(textarea, textToInsert) {
+                const startPos = textarea.selectionStart;
+                const endPos = textarea.selectionEnd;
+                const scrollTop = textarea.scrollTop;
+                textarea.value = textarea.value.substring(0, startPos) +
+                                 textToInsert +
+                                 textarea.value.substring(endPos, textarea.value.length);
+                textarea.selectionStart = textarea.selectionEnd = startPos + textToInsert.length;
+                textarea.scrollTop = scrollTop;
+            }
+
+            toggleModeButton.addEventListener('click', () => {
+                if (currentMode === 'onscreen') {
+                    currentMode = 'phonetic';
+                    toggleModeButton.textContent = 'ಆನ್-ಸ್ಕ್ರೀನ್ ಕೀಬೋರ್ಡ್‌ಗೆ ಬದಲಿಸಿ';
+                    statusMessage.textContent = 'ಮೋಡ್: ಧ್ವन्याತ್ಮಕ ಟೈಪಿಂಗ್';
+                    onScreenKeyboardArea.classList.add('hidden');
+                    phoneticInstructions.classList.remove('hidden');
+                    mainTextarea.readOnly = false;
+                    mainTextarea.placeholder = "ಧ್ವन्याತ್ಮಕವಾಗಿ ಟೈಪ್ ಮಾಡಿ (ಉದಾ: nanna desha)";
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                } else {
+                    currentMode = 'onscreen';
+                    toggleModeButton.textContent = 'ಧ್ವन्याತ್ಮಕ ಮೋಡ್‌ಗೆ ಬದಲಿಸಿ';
+                    statusMessage.textContent = 'ಮೋಡ್: ಆನ್-ಸ್ಕ్రీన్ ಕೀಬೋರ್ಡ್';
+                    onScreenKeyboardArea.classList.remove('hidden');
+                    phoneticInstructions.classList.add('hidden');
+                    mainTextarea.readOnly = true;
+                    mainTextarea.placeholder = "ಆನ್-ಸ್ಕ్రీన్ ಕೀಬೋರ್ಡ್ ಬಳಸಿ";
+                    mainTextarea.removeEventListener('input', handlePhoneticInput);
+                }
+                mainTextarea.focus();
+            });
+
+            function handlePhoneticInput() {
+                if (currentMode === 'phonetic') {
+                    const currentRawInput = mainTextarea.value;
+                    const originalCursorStart = mainTextarea.selectionStart;
+                    const kannadaText = convertPhoneticToKannada(currentRawInput);
+                    const rawInputBeforeCursor = currentRawInput.substring(0, originalCursorStart);
+                    const convertedPrefix = convertPhoneticToKannada(rawInputBeforeCursor);
+                    let newCursorPos = convertedPrefix.length;
+                    mainTextarea.removeEventListener('input', handlePhoneticInput);
+                    mainTextarea.value = kannadaText;
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                    try {
+                        mainTextarea.selectionStart = mainTextarea.selectionEnd = newCursorPos;
+                    } catch (e) {
+                        mainTextarea.selectionStart = mainTextarea.selectionEnd = kannadaText.length;
+                    }
+                    previousPhoneticInput = currentRawInput;
+                }
+            }
+
+            copyButton.addEventListener('click', () => {
+                if (!mainTextarea.value) return;
+                navigator.clipboard.writeText(mainTextarea.value)
+                    .then(() => {
+                        const originalText = copyButton.textContent;
+                        copyButton.textContent = 'ನಕಲಿಸಲಾಗಿದೆ!';
+                        copyButton.disabled = true;
+                        setTimeout(() => {
+                            copyButton.textContent = originalText;
+                            copyButton.disabled = false;
+                        }, 1500);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                        mainTextarea.select();
+                        try {
+                            document.execCommand('copy');
+                            const originalText = copyButton.textContent;
+                            copyButton.textContent = 'ನಕಲಿಸಲಾಗಿದೆ (fallback)!';
+                            copyButton.disabled = true;
+                            setTimeout(() => {
+                                copyButton.textContent = originalText;
+                                copyButton.disabled = false;
+                            }, 2000);
+                        } catch (e) {
+                             alert('ನಕಲಿಸಲು ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ನೀವೇ ನಕಲಿಸಿ.');
+                        }
+                        window.getSelection().removeAllRanges();
+                    });
+                mainTextarea.focus();
+            });
+
+            function initializeApp() {
+                createOnScreenKeyboard();
+                if (currentMode === 'onscreen') {
+                    mainTextarea.readOnly = true;
+                    mainTextarea.placeholder = "ಆನ್-ಸ್ಕ్రీన్ ಕೀಬೋರ್ಡ್ ಬಳಸಿ";
+                    onScreenKeyboardArea.classList.remove('hidden');
+                    phoneticInstructions.classList.add('hidden');
+                    statusMessage.textContent = 'ಮೋಡ್: ಆನ್-ಸ್ಕ్రీన్ ಕೀಬೋರ್ಡ್';
+                    toggleModeButton.textContent = 'ಧ್ವन्याತ್ಮಕ ಮೋಡ್‌ಗೆ ಬದಲಿಸಿ';
+                } else {
+                    mainTextarea.readOnly = false;
+                    mainTextarea.placeholder = "ಧ್ವन्याತ್ಮಕವಾಗಿ ಟೈಪ್ ಮಾಡಿ (ಉದಾ: nanna desha)";
+                    onScreenKeyboardArea.classList.add('hidden');
+                    phoneticInstructions.classList.remove('hidden');
+                    statusMessage.textContent = 'ಮೋಡ್: ಧ್ವन्याತ್ಮಕ ಟೈಪಿಂಗ್';
+                    toggleModeButton.textContent = 'ಆನ್-ಸ್ಕ್ರೀನ್ ಕೀಬೋರ್ಡ್‌ಗೆ ಬದಲಿಸಿ';
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                }
+                mainTextarea.focus();
+            }
+            initializeApp();
+        });
+    </script>
+</body>
+</html>
