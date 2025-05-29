@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>આધુનિક ગુજરાતી ટાઇપિંગ ટૂલ</title>
+    <style>
+        :root {
+            --bg-color: #261C15;
+            --surface-color: #3E2C21;
+            --text-color: #F5EFE6;
+            --primary-color: #FF8C00;
+            --primary-hover-color: #E67E00;
+            --secondary-color: #5A3E30;
+            --secondary-hover-color: #6B4A3A;
+            --border-color: #503C30;
+            --font-gujarati: 'Noto Sans Gujarati', 'Shruti', 'Arial', sans-serif; /* Gujarati Fonts */
+            --font-latin: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-latin);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.7; /* Adjusted for Gujarati */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .app-header {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 0 5px;
+        }
+
+        .app-header h1 {
+            font-family: var(--font-gujarati);
+            font-size: 1.3em;
+            color: var(--primary-color);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .back-button {
+            font-family: var(--font-gujarati);
+            padding: 7px 12px;
+            font-size: 0.85em;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        .back-button:hover {
+            background-color: var(--secondary-hover-color);
+        }
+
+        .container {
+            background-color: var(--surface-color);
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+            width: 100%;
+            max-width: 800px;
+            overflow-x: hidden;
+        }
+
+        .main-textarea {
+            width: 100%;
+            min-height: 130px;
+            font-size: 1.5em;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin-bottom: 12px;
+            resize: vertical;
+            font-family: var(--font-gujarati);
+        }
+        .main-textarea::placeholder {
+            color: #998273;
+            font-family: var(--font-gujarati);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .controls button {
+            font-family: var(--font-gujarati);
+            padding: 8px 12px;
+            font-size: 0.9em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: #111;
+            transition: background-color 0.2s, transform 0.1s;
+            font-weight: 600;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+        }
+        .controls button:hover {
+            background-color: var(--primary-hover-color);
+        }
+        .controls button:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .controls button.secondary {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+        .controls button.secondary:hover {
+            background-color: var(--secondary-hover-color);
+        }
+
+        .status-message {
+            font-family: var(--font-gujarati);
+            text-align: center;
+            margin-bottom: 12px;
+            font-style: italic;
+            color: #BEA697;
+            font-size: 0.85em;
+        }
+
+        .instructions.hidden {
+             display: none !important;
+        }
+        .instructions {
+            background-color: rgba(0,0,0,0.1);
+            padding: 8px;
+            border-radius: 5px;
+            margin-top: 8px;
+            font-size: 0.75em;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            font-family: var(--font-gujarati);
+        }
+        .instructions p {
+            text-align: center;
+        }
+        .instructions code {
+            background-color: rgba(255,255,255,0.1);
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-family: var(--font-latin);
+            color: #c0c0c0;
+        }
+
+        .keyboard-area {
+            border: 1px solid var(--border-color);
+            padding: 8px 4px;
+            border-radius: 6px;
+            background-color: var(--bg-color);
+            overflow-x: auto;
+        }
+
+        .keyboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            justify-content: center;
+        }
+
+        .keyboard-row {
+            display: flex;
+            width: 100%;
+            margin-bottom: 2px;
+            gap: 2px;
+        }
+
+        .keyboard button {
+            font-family: var(--font-gujarati);
+            font-size: clamp(0.9em, 2.2vw, 1.15em);
+            padding: 4px 0;
+            flex-grow: 1;
+            flex-shrink: 1;
+            flex-basis: 0;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            background-color: var(--surface-color);
+            color: var(--text-color);
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+            min-width: 26px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            box-sizing: border-box;
+        }
+        .keyboard button:hover {
+            background-color: var(--secondary-hover-color);
+            border-color: var(--primary-color);
+        }
+        .keyboard button:active {
+            background-color: var(--primary-color);
+            color: #111;
+            transform: translateY(1px);
+        }
+
+        .keyboard button.special {
+            background-color: var(--secondary-color);
+            font-size: clamp(0.75em, 1.6vw, 0.9em);
+            flex-grow: 1.3;
+            font-family: var(--font-latin);
+        }
+         .keyboard button.special.gujarati-text {
+             font-family: var(--font-gujarati);
+             font-size: clamp(0.7em, 1.5vw, 0.85em);
+        }
+        .keyboard button.spacebar {
+            flex-grow: 4;
+        }
+
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 480px) {
+            .keyboard button {
+                min-width: 22px;
+                height: 38px;
+                font-size: clamp(0.8em, 2vw, 1em);
+            }
+             .keyboard button.special {
+                font-size: clamp(0.7em, 1.5vw, 0.85em);
+            }
+            .app-header h1 { font-size: 1.2em; }
+            .main-textarea { font-size: 1.4em; }
+        }
+         @media (max-width: 360px) {
+            .keyboard button {
+                min-width: 20px;
+                height: 36px;
+                font-size: clamp(0.7em, 1.8vw, 0.9em);
+            }
+            .controls button {
+                 font-size: 0.85em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <h1>ગુજરાતી ટાઇપિંગ ટૂલ</h1>
+        <a href="index.html" class="back-button">પાછા</a>
+    </header>
+
+    <div class="container">
+        <textarea id="mainTextarea" class="main-textarea" placeholder="અહીં ટાઇપ કરો..."></textarea>
+
+        <div class="controls">
+            <button id="toggleModeButton">ફોનેટિક મોડ</button>
+            <button id="copyButton" class="secondary">કૉપિ કરો</button>
+        </div>
+
+        <div id="statusMessage" class="status-message">મોડ: સ્ક્રીન કીબોર્ડ</div>
+
+        <div id="phoneticInstructions" class="instructions hidden">
+            <p>ફોનેટિક મોડ સક્રિય છે. (ઉદાહરણ: <code>k</code> &rarr; ક, <code>X</code> &rarr; ્)</p>
+        </div>
+
+        <div id="onScreenKeyboardArea" class="keyboard-area">
+            <div id="gujaratiKeyboard" class="keyboard">
+                <!-- Gujarati Keyboard buttons will be generated here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mainTextarea = document.getElementById('mainTextarea');
+            const toggleModeButton = document.getElementById('toggleModeButton');
+            const copyButton = document.getElementById('copyButton');
+            const onScreenKeyboardArea = document.getElementById('onScreenKeyboardArea');
+            const phoneticInstructions = document.getElementById('phoneticInstructions');
+            const keyboardContainer = document.getElementById('gujaratiKeyboard');
+            const statusMessage = document.getElementById('statusMessage');
+
+            let currentMode = 'onscreen';
+
+            // --- Gujarati Phonetic Conversion Logic ---
+            const phoneticMap = {
+                // Vowels (Svar) - Standalone and Matras (Kāno, Mātrā, etc.)
+                'aa': { default: 'આ', matra: 'ા' }, 'A': { default: 'આ', matra: 'ા' },
+                'ee': { default: 'ઈ', matra: 'ી' }, 'II': { default: 'ઈ', matra: 'ી' }, 'I': { default: 'ઈ', matra: 'ી' }, // Dirgh I
+                'oo': { default: 'ઊ', matra: 'ૂ' }, 'UU': { default: 'ઊ', matra: 'ૂ' }, 'U': { default: 'ઊ', matra: 'ૂ' }, // Dirgh U
+                'RU': { default: 'ઋ', matra: 'ૃ' }, 'R^U': { default: 'ઋ', matra: 'ૃ' }, // Ru
+                'AI': { default: 'ઐ', matra: 'ૈ' }, 'ai': { default: 'ઐ', matra: 'ૈ' },
+                'AU': { default: 'ઔ', matra: 'ૌ' }, 'au': { default: 'ઔ', matra: 'ૌ' },
+                'a':  { default: 'અ', matra: '' },  // Inherent 'a'
+                'i':  { default: 'ઇ', matra: 'િ' },  // Hrasva I
+                'u':  { default: 'ઉ', matra: 'ુ' },  // Hrasva U
+                'e':  { default: 'એ', matra: 'ે' }, 'E': { default: 'એ', matra: 'ે' },
+                'o':  { default: 'ઓ', matra: 'ો' }, 'O': { default: 'ઓ', matra: 'ો' },
+
+                // Consonants (Vyanjan)
+                'kh': 'ખ', 'Kh': 'ખ',
+                'gh': 'ઘ', 'Gh': 'ઘ',
+                'Ng': 'ઙ', 'NG': 'ઙ',
+                'ch': 'ચ', 'Ch': 'ચ',
+                'chh': 'છ', 'Chh': 'છ',
+                'jh': 'ઝ', 'Jh': 'ઝ',
+                'Ny': 'ઞ', 'NY': 'ઞ', 'Jn': 'ઞ',
+                'Th': 'ઠ',
+                'Dh': 'ઢ',
+                'N': 'ણ', // Retroflex N
+                'th': 'થ',
+                'dh': 'ધ',
+                'ph': 'ફ', 'Ph': 'ફ', 'f': 'ફ', 'F': 'ફ',
+                'bh': 'ભ', 'Bh': 'ભ',
+                'k': 'ક', 'K': 'ક', 'q': 'ક', 'Q': 'ક',
+                'g': 'ગ', 'G': 'ગ',
+                'j': 'જ', 'J': 'જ', 'z': 'જ', 'Z': 'જ',
+                'T': 'ટ', // Retroflex T
+                'D': 'ડ', // Retroflex D
+                't': 'ત', // Dental t
+                'd': 'દ', // Dental d
+                'n': 'ન', // Dental n
+                'p': 'પ', 'P': 'પ',
+                'b': 'બ', 'B': 'બ',
+                'm': 'મ', 'M': 'મ',
+                'y': 'ય', 'Y': 'ય',
+                'r': 'ર', 'R': 'ર',
+                'l': 'લ', 'L': 'લ',
+                'Lh': 'ળ', // Retroflex Lh/Ld (ળ)
+                'v': 'વ', 'V': 'વ', 'w': 'વ', 'W': 'વ',
+                'sh': 'શ', // Palatal sh
+                'Sh': 'ષ', 'SH': 'ષ', // Retroflex Sh
+                's': 'સ', 'S': 'સ', // Dental s
+                'h': 'હ', 'H': 'હ',
+
+                // Virama (Halant)
+                'X': '્', 'virama': '્',
+
+                // Anusvara, Visarga, Chandrabindu
+                '.M': 'ં', 'anusvara': 'ં', // Anusvara (dot above)
+                '.H': 'ઃ', 'visarga': 'ઃ', // Visarga (two dots)
+                '.N': 'ઁ', 'chandrabindu': 'ઁ', // Chandrabindu (moon dot)
+
+                // Common Conjuncts (Jodakshar)
+                'ksh': 'ક્ષ', 'kSh': 'ક્ષ',
+                'gy': 'જ્ઞ', 'gny': 'જ્ઞ', 'jny': 'જ્ઞ',
+                'tr': 'ત્ર', 'Tr': 'ત્ર',
+                'shr': 'શ્ર', 'Shra': 'શ્ર',
+
+                // Punctuation
+                '..': '.', // English Period
+                '.': '૤',  // Gujarati Purnaviram (Dando)
+                '$': '₹', // Rupee sign
+                '?': '?', '!': '!', ',': ','
+            };
+
+            const gujaratiConsonants = "કખગઘઙચછજઝઞટઠડઢણતથદધનપફબભમયરલળવશષસહક્ષજ્ઞ";
+            const isGujaratiConsonant = char => gujaratiConsonants.includes(char);
+
+            function convertPhoneticToGujarati(inputText) {
+                let output = "";
+                let i = 0;
+                const len = inputText.length;
+                const phoneticKeys = Object.keys(phoneticMap).sort((a, b) => b.length - a.length);
+
+                while (i < len) {
+                    let matched = false;
+                    for (const key of phoneticKeys) {
+                        if (inputText.substring(i).startsWith(key)) {
+                            const rule = phoneticMap[key];
+                            let charToAdd = "";
+
+                            if (typeof rule === 'string') { // Consonant, virama, modifiers, punctuation
+                                if (rule === '્' && output.length > 0 && isGujaratiConsonant(output[output.length - 1])) {
+                                    if (output.length > 0 && output[output.length-1] !== '્') {
+                                       charToAdd = rule;
+                                    }
+                                } else if (isGujaratiConsonant(rule) || ['ં', 'ઃ', 'ઁ', '૤', '₹'].includes(rule)) {
+                                    charToAdd = rule;
+                                } else if (['.', '?', '!', ','].includes(rule)) {
+                                    charToAdd = rule;
+                                } else if (rule !== '્') { // Avoid adding lone virama
+                                    charToAdd = rule;
+                                }
+                            } else { // Vowel object {default, matra}
+                                const lastCharOutput = output.length > 0 ? output[output.length - 1] : null;
+                                if (lastCharOutput && (isGujaratiConsonant(lastCharOutput) || lastCharOutput === '્') && rule.matra !== undefined) {
+                                    if (key === 'a' && rule.matra === '') { // Inherent 'a'
+                                        if (output.endsWith('્')) { // Remove virama if 'a' is typed
+                                            output = output.substring(0, output.length -1);
+                                        }
+                                        charToAdd = ''; // Matra for 'a' is implicit
+                                    } else { // Other vowels
+                                        if (output.endsWith('્')) { // Remove virama before applying matra
+                                           output = output.substring(0, output.length -1);
+                                        }
+                                        charToAdd = rule.matra;
+                                    }
+                                } else { // Vowel is standalone
+                                    charToAdd = rule.default;
+                                }
+                            }
+                            output += charToAdd;
+                            i += key.length;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        if (/[0-9]/.test(inputText[i])) {
+                            output += inputText[i];
+                        } else {
+                           output += inputText[i]; // Pass unmatched characters
+                        }
+                        i++;
+                    }
+                }
+                return output;
+            }
+
+            // --- On-Screen Gujarati Keyboard Logic ---
+            const gujaratiKeyboardLayout = [
+                ['અ', 'આ', 'ઇ', 'ઈ', 'ઉ', 'ઊ', 'ઋ', 'એ', 'ઐ', 'ઓ', 'ઔ', 'અં', 'અઃ', 'ઁ'],
+                ['ક', 'ખ', 'ગ', 'ઘ', 'ઙ',  'ચ', 'છ', 'જ', 'ઝ', 'ઞ'],
+                ['ટ', 'ઠ', 'ડ', 'ઢ', 'ણ',  'ત', 'થ', 'દ', 'ધ', 'ન'],
+                ['પ', 'ફ', 'બ', 'ભ', 'મ',  'ય', 'ર', 'લ', 'વ', 'શ'],
+                ['ષ', 'સ', 'હ', 'ળ', 'ક્ષ', 'જ્ઞ', 'શ્ર', '્'], // Virama
+                ['ા', 'િ', 'ી', 'ુ', 'ૂ', 'ૃ', 'ે', 'ૈ', 'ો', 'ૌ'], // Matras
+                ['૦', '૧', '૨', '૩', '૪', '૫', '૬', '૭', '૮', '૯', '૤'], // Gujarati Numerals, Dando
+                ['?', '!', ',', '.', '₹', 'Backspace', 'Space', 'Clear']
+            ];
+
+
+            function createOnScreenKeyboard() {
+                keyboardContainer.innerHTML = '';
+                gujaratiKeyboardLayout.forEach(rowKeys => {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.classList.add('keyboard-row');
+                    rowKeys.forEach(key => {
+                        const button = document.createElement('button');
+                        button.textContent = key;
+                        if (['Backspace', 'Space', 'Clear'].includes(key)) {
+                            button.classList.add('special');
+                            if (key === 'Space') button.classList.add('spacebar');
+                            if (key === 'Backspace') {button.textContent = '←';}
+                            if (key === 'Clear') {button.textContent = 'કાઢી નાખો'; button.classList.add('gujarati-text');}
+                        } else if (['?', '!', '₹', ',', '.'].includes(key) || (key >= '0' && key <= '9' && key.length === 1 && !gujaratiKeyboardLayout.flat().includes(key))){
+                             button.classList.add('special');
+                        }
+                        button.addEventListener('click', () => handleOnScreenKey(key));
+                        rowDiv.appendChild(button);
+                    });
+                    keyboardContainer.appendChild(rowDiv);
+                });
+            }
+
+            function handleOnScreenKey(keyToHandle) {
+                let key = keyToHandle;
+                if (key === 'કાઢી નાખો') key = 'Clear';
+                if (key === '←') key = 'Backspace';
+
+                const cursorPos = mainTextarea.selectionStart;
+                const text = mainTextarea.value;
+                switch (key) {
+                    case 'Backspace':
+                        if (cursorPos > 0 || mainTextarea.selectionEnd > mainTextarea.selectionStart) {
+                             const before = text.substring(0, mainTextarea.selectionStart - (mainTextarea.selectionEnd === mainTextarea.selectionStart ? 1:0) );
+                             const after = text.substring(mainTextarea.selectionEnd);
+                             mainTextarea.value = before + after;
+                             mainTextarea.selectionStart = mainTextarea.selectionEnd = before.length;
+                        }
+                        break;
+                    case 'Clear':
+                        mainTextarea.value = '';
+                        break;
+                    case 'Space':
+                        insertAtCursor(mainTextarea, ' ');
+                        break;
+                    default:
+                        insertAtCursor(mainTextarea, key);
+                        break;
+                }
+                mainTextarea.focus();
+            }
+
+            function insertAtCursor(textarea, textToInsert) {
+                const startPos = textarea.selectionStart;
+                const endPos = textarea.selectionEnd;
+                const scrollTop = textarea.scrollTop;
+                textarea.value = textarea.value.substring(0, startPos) +
+                                 textToInsert +
+                                 textarea.value.substring(endPos, textarea.value.length);
+                textarea.focus();
+                textarea.selectionStart = textarea.selectionEnd = startPos + textToInsert.length;
+                textarea.scrollTop = scrollTop;
+            }
+
+            toggleModeButton.addEventListener('click', () => {
+                if (currentMode === 'onscreen') {
+                    currentMode = 'phonetic';
+                    toggleModeButton.textContent = 'સ્ક્રીન કીબોર્ડ';
+                    statusMessage.textContent = 'મોડ: ફોનેટિક ટાઇપિંગ';
+                    onScreenKeyboardArea.classList.add('hidden');
+                    phoneticInstructions.classList.remove('hidden');
+                    mainTextarea.readOnly = false;
+                    mainTextarea.placeholder = "ફોનેટિક રીતે ટાઇપ કરો (ઉદા: kem chho)...";
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                } else {
+                    currentMode = 'onscreen';
+                    toggleModeButton.textContent = 'ફોનેટિક મોડ';
+                    statusMessage.textContent = 'મોડ: સ્ક્રીન કીબોર્ડ';
+                    onScreenKeyboardArea.classList.remove('hidden');
+                    phoneticInstructions.classList.add('hidden');
+                    mainTextarea.readOnly = true;
+                    mainTextarea.placeholder = "સ્ક્રીન કીબોર્ડનો ઉપયોગ કરો...";
+                    mainTextarea.removeEventListener('input', handlePhoneticInput);
+                }
+                mainTextarea.focus();
+            });
+
+             function handlePhoneticInput() {
+                if (currentMode === 'phonetic') {
+                    const currentRawInput = mainTextarea.value;
+                    const originalCursorStart = mainTextarea.selectionStart;
+                    const gujaratiText = convertPhoneticToGujarati(currentRawInput);
+                    const rawInputBeforeCursor = currentRawInput.substring(0, originalCursorStart);
+                    const convertedPrefix = convertPhoneticToGujarati(rawInputBeforeCursor);
+                    let newCursorPos = convertedPrefix.length;
+
+                    mainTextarea.removeEventListener('input', handlePhoneticInput);
+                    mainTextarea.value = gujaratiText;
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+
+                    try {
+                        mainTextarea.selectionStart = mainTextarea.selectionEnd = newCursorPos;
+                    } catch (e) {
+                        mainTextarea.selectionStart = mainTextarea.selectionEnd = gujaratiText.length;
+                    }
+                }
+            }
+
+
+            copyButton.addEventListener('click', () => {
+                if (!mainTextarea.value) return;
+                navigator.clipboard.writeText(mainTextarea.value)
+                    .then(() => {
+                        const originalText = copyButton.textContent;
+                        copyButton.textContent = 'કૉપિ થયું!';
+                        copyButton.disabled = true;
+                        setTimeout(() => {
+                            copyButton.textContent = originalText;
+                            copyButton.disabled = false;
+                        }, 1500);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                        mainTextarea.select();
+                        try {
+                            document.execCommand('copy');
+                            const originalText = copyButton.textContent;
+                            copyButton.textContent = 'કૉપિ થયું (ફોલબેક)!';
+                            copyButton.disabled = true;
+                            setTimeout(() => {
+                                copyButton.textContent = originalText;
+                                copyButton.disabled = false;
+                            }, 2000);
+                        } catch (e) {
+                             alert('કૉપિ કરવામાં નિષ્ફળ. કૃપા કરીને જાતે કૉપિ કરો.');
+                        }
+                        window.getSelection().removeAllRanges();
+                    });
+                mainTextarea.focus();
+            });
+
+            const clearButton = document.createElement('button');
+            clearButton.textContent = 'કાઢી નાખો';
+            clearButton.classList.add('secondary', 'gujarati-text');
+            clearButton.id = 'clearButton';
+            clearButton.addEventListener('click', () => {
+                mainTextarea.value = '';
+                mainTextarea.focus();
+            });
+            copyButton.parentNode.insertBefore(clearButton, copyButton.nextSibling);
+
+
+            function initializeApp() {
+                createOnScreenKeyboard();
+                if (currentMode === 'onscreen') {
+                    mainTextarea.readOnly = true;
+                    mainTextarea.placeholder = "સ્ક્રીન કીબોર્ડનો ઉપયોગ કરો...";
+                    onScreenKeyboardArea.classList.remove('hidden');
+                    phoneticInstructions.classList.add('hidden');
+                    statusMessage.textContent = 'મોડ: સ્ક્રીન કીબોર્ડ';
+                    toggleModeButton.textContent = 'ફોનેટિક મોડ';
+                } else {
+                    mainTextarea.readOnly = false;
+                    mainTextarea.placeholder = "ફોનેટિક રીતે ટાઇપ કરો (ઉદા: kem chho)...";
+                    onScreenKeyboardArea.classList.add('hidden');
+                    phoneticInstructions.classList.remove('hidden');
+                    statusMessage.textContent = 'મોડ: ફોનેટિક ટાઇપિંગ';
+                    toggleModeButton.textContent = 'સ્ક્રીન કીબોર્ડ';
+                    mainTextarea.addEventListener('input', handlePhoneticInput);
+                }
+                mainTextarea.focus();
+            }
+            initializeApp();
+        });
+    </script>
+</body>
+</html>
